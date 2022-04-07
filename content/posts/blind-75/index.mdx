@@ -1,0 +1,108 @@
+---
+title: Blind 75
+date: 2022-04-06
+tags:
+  - Blind75
+  - LeetCode
+---
+
+### [Two Sum](https://leetcode.com/problems/two-sum/)
+
+#### Problem Statement:
+
+Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.
+
+#### Initial Thoughts:
+
+##### Brute force search in `O(n^2)`:
+
+Loop through each element `x` and find if there is another value that equals to `target` - `x`
+
+##### Using Map:
+
+For a more efficient way to check if the complement exists in the array - we can maintain a Map.
+For each element `nums[i]`, we will store `i` for `nums[i]` as key.
+This will reduce the time down to `O(n)` but it will also have `O(n)` space complexity.
+
+We can do better than going through the array twice.
+While we are constructing the Map we can check if its complement has already been inserted or not.
+
+###### Solution:
+
+```ts
+function twoSum(nums: number[], target: number): number[] {
+  const map = new Map<number, number>(nums.map((num, index) => [num, index]));
+  let answer: number[] = [];
+
+  nums.forEach((num, index) => {
+    const complementNumber = target - num;
+    const complementIndex = map.get(complementNumber);
+    if (typeof complementIndex === "undefined") return;
+    if (complementIndex === index) return;
+
+    answer = [index, complementIndex];
+  });
+
+  return answer;
+}
+```
+
+### [Longest substring without repeating characters](https://leetcode.com/problems/two-sum/)
+
+#### Problem Statement:
+
+Given a string `s`, find the length of the longest substring without repeating characters.
+
+#### Initial Thoughts:
+
+##### Brute force:
+
+Fix an initial starting index say `i`.
+Now search for all the substrings starting at index `i` and ending at index `j` where `i <= j < s.length`
+Now in this substring find if there are any repeating characters - if not check with the best answer so far and if it beats the best answer then consider this as the new best answer.
+The time complexity depends on how we are finding if there are any repeating characters in a string.
+
+So the time complexity will be `O(n ^ 2 * (cost of finding repeating characters))`
+
+##### Two pointer approach:
+
+Keep a left pointer which starts from index 0. Initialise the right pointer also at index 0.
+
+If the substring from left to right does not have repeating characters then we can increment the right pointer while the constraint is met.
+If the substring has repeating characters then we have two choices:
+
+- Either we keep incrementing the right pointer - but that doesn't make any sense because the string has repeated characters.
+  Any more addition in the string will only make it contain repeated characters
+- Or we can increment the left pointer and hope to drop the repeating characters
+
+Since in this approach, all the elements will be traversed at most twice - once by each left and right pointer.
+So the time complexity will be `O(n * (cost of finding repeating characters))`
+
+I wouldn't have been able to solve this using two-pointer approach had I not watched the video from the [Back to Back SWE](https://www.youtube.com/watch?v=eS6PZLjoaq8).
+
+But the main problem still remains to be solved: How do I find if a string has repeating characters or not?
+
+```ts
+function hasRepeatingCharacters(s: string): boolean {
+  const seenCharacters = new Set([...s]);
+  return seenCharacters.size < s.length;
+}
+
+function lengthOfLongestSubstring(s: string): number {
+  let leftPointer = 0;
+  let rightPointer = 1;
+  let answer = 0;
+
+  while (rightPointer <= s.length) {
+    const substringToCheck = s.substring(leftPointer, rightPointer);
+    if (hasRepeatingCharacters(substringToCheck)) {
+      leftPointer += 1;
+      continue;
+    }
+    answer = Math.max(answer, substringToCheck.length);
+    rightPointer += 1;
+  }
+
+  return answer;
+}
+```
