@@ -1,0 +1,207 @@
+---
+title: Apollo Client Cheatsheet
+date: 2021-12-29
+tags:
+  - GraphQL
+  - TypeScript
+  - React
+  - apollo-client
+---
+
+**Disclaimer**: _This is a cheatsheet for apollo client, meant to help me quickly lookup the concepts with code snippets.
+Most of the stuff that you see here will be taken directly from [apollo client's documentation](https://www.apollographql.com/docs).
+Although I will try my best but the content that you see here can be outdated/incorrect. In case if you see any discrepancy, please reach out to me on [twitter](https://twitter.com/__mihirs15__)._
+
+## Why Apollo Client?
+
+### Declarative data fetching:
+
+All of the logic for retrieving your data (making a network request), tracking loading and error states, and keeping your UI up-to-date based on the network request's status is encapsulated by the `useQuery` hook.
+
+An example of the API:
+
+```tsx
+function Feed() {
+  const { loading, error, data } = useQuery(GET_DOGS);
+  // Handle error state
+  if (error) return <Error />;
+  // Handle loading state
+  if (loading) return <Fetching />;
+
+  // Network request is succesfully resolved
+  // let's use the data to render our UI
+  return <DogList dogs={data.dogs} />;
+}
+```
+
+`useQuery` leverages React's Hooks API to bind the query to our component and render it based on the results of our query.
+Apollo Client takes care of the request cycle from start to finish, including tracking loading and error states for you and triggering re-renders of the component based on the state.
+
+### Zero Config Caching:
+
+One of the key features that sets Apollo Client apart from other data management solutions is its _normalized_ cache.
+**Since you can have multiple paths leading to the same data, normalization is essential for keeping your data consistent across multiple components.**
+
+**Normalization**: Apollo Client splits out each object in a GraphQL result with a `__typename` and an `id` property into its own entry in the Apollo cache.
+This guarantees that returning a value from a mutation with an `id` will automatically update any queries that fetch the object with the same id.
+
+---
+
+## Queries
+
+### Executing a query
+
+The `useQuery` React hook is the primary API for executing queries in an Apollo application.
+
+**Arguments:** To run a query within a React component, call `useQuery` and pass it a GraphQL query string.
+💡 Remember to wrap query strings in the `gql` function to parse them into query documents.
+We can also pass configuration options (for example: `variables`) as the second argument in the `useQuery` hook.
+The `variables` option is an object that contains all of the variables we want to pass to our GraphQL query.
+
+**Returns:** When your component renders, useQuery returns an object from Apollo Client that contains loading, error, and data properties you can use to render your UI.
+
+### Caching query results
+
+Whenever Apollo Client fetches query results from your server, it **automatically** caches those results locally. This makes subsequent executions of the same query extremely fast.
+
+Example: Fetch the dogs list, render the list in dropdown. Select a dog and render `DogPhoto` component based on its breed.
+If we select bulldog from the dropdown, we will first see a network request and once it resolves we can see its photo appear.
+Now if we switch to another breed, and then switch back to bulldog, the bulldog's photo loads instantly the second time around. This is the Apollo cache at work!
+
+### Updating cached query results
+
+Sometimes, you want to make sure that your query's cached data is up to date with your server's data.
+Apollo Client supports two strategies for this: **polling** and **refetching**.
+
+#### Polling
+
+Polling provides near-real-time synchronization with your server by executing your query periodically at a specified interval.
+To enable polling for a query, we can pass a `pollInterval` configuration option (second argument) to the `useQuery` hook with an interval in milliseconds.
+For example: By setting pollInterval to 500, we fetch the current breed's image from the server every 0.5 seconds. Note that if you set pollInterval to 0, the query does not poll.
+
+#### Refetching
+
+Refetching enables you to _refresh query results in response to a particular user action_, as opposed to using a fixed interval.
+You can optionally provide a new variables object to the refetch function. If you don't, the query uses the **same variables** that it used in its previous execution.
+
+#### Inspecting loading states
+
+The `useQuery` hook's result object provides fine-grained information about the status of the query via the `networkStatus` property.
+Passing `notifyOnNetworkStatusChange` option as true triggers a re-render in our query component while a refetch is in flight.
+
+#### Inspecting error states
+
+You can customize your query error handling by providing the `errorPolicy` configuration option to `useQuery` hook.
+Default value is `none`, which tells Apollo Client to treat all GraphQL errors as runtime errors.
+In this case, Apollo Client discards any query response data returned by the server and sets the error property in the useQuery result object.
+
+If you set `errorPolicy` to `all`, `useQuery` **does not discard** query response data, allowing you to render partial results.
+
+#### Manual execution with useLazyQuery
+
+When React renders a component that calls useQuery, Apollo Client automatically executes the corresponding query.
+But what if you want to execute a query in response to a different event, such as a user clicking a button?
+
+The useLazyQuery hook is perfect for executing queries in response to events besides component rendering.
+Unlike with useQuery, when you call useLazyQuery, it **does not immediately execute** its associated query.
+Instead, it returns a query function in its result tuple that you call whenever you're ready to execute the query.
+
+```tsx {6,15}
+import React from "react";
+
+import { useLazyQuery } from "@apollo/client";
+
+function DelayedQuery() {
+  const [getDog, { loading, error, data }] = useLazyQuery(GET_DOG_PHOTO);
+
+  if (loading) return <p>Loading ...</p>;
+  if (error) return `Error! ${error}`;
+
+  return (
+    <div>
+      {data?.dog && <img src={data.dog.displayImage} />}
+
+      <button onClick={() => getDog({ variables: { breed: "bulldog" } })}>
+        Click me!
+      </button>
+    </div>
+  );
+}
+```
+
+The first item in useLazyQuery's return tuple is the _query function_, and the second item is the same result object returned by useQuery.
+
+As shown above, you can pass configuration options to the query function just like you pass them to `useLazyQuery` itself.
+If you pass a particular option to both, the value you pass to the query function takes precedence.
+
+💡 This is a handy way to pass default options to `useLazyQuery` and then customize those options in the query function
+
+#### Setting a fetch policy
+
+1. `cache-first` - The default fetch policy:
+
+   Apollo Client first executes the query against the cache.
+   If **all** requested data is present in the cache, that data is returned.
+   Otherwise, Apollo Client executes the query against your GraphQL server and returns that data after caching it.
+
+   💡 Prioritizes minimizing the number of network requests sent by your application.
+
+2. `cache-only`:
+
+   Apollo Client executes the query _only against the cache_. It never queries your server in this case.
+
+   A cache-only query _throws an error_ if the cache does not contain data for all requested fields.
+
+3. `cache-and-network`:
+
+   Apollo Client executes the full query against **both** the _cache_ and _your GraphQL server_.
+   The query automatically updates (triggers a re-render) if the result of the server-side query _modifies_ cached fields.
+
+   💡 Provides a fast response while also helping to keep cached data consistent with server data.
+
+4. `network-only`:
+
+   Apollo Client executes the full query against your GraphQL server, without first checking the cache.
+   The query's result _is stored_ in the cache.
+
+   💡 Prioritizes consistency with server data, but _can't provide_ a near-instantaneous response when cached data is available. Doesn't utilize the cache at all.
+
+5. `no-cache`:
+
+   Similar to network-only, except the query's result _is not_ stored in the cache.
+
+6. `standby`:
+
+   Uses the same logic as cache-first, except this query does not automatically update when underlying field values change. You can still manually update this query with refetch and updateQueries.
+
+##### Difference between different fetchPolicies:
+
+Let's consider the following scenario where we are using the same `useNotesCategoryQuery` at two different places.
+
+```tsx
+<App>
+  // Internally uses useNotesCategoryQuery
+  <NotesCategorySwitcher />
+  <NotesList />
+  {showCreationModal ? (
+    <NoteCreationFormModal>
+      <NoteContent />
+      // Internally uses useNotesCategoryQuery
+      <NotesCategorySelector />
+    </NoteCreationFormModal>
+  ) : null}
+</App>
+```
+
+When the `NotesCategorySelector` is mounted, the cache already has the list of categories via `NotesCategorySwitcher`
+
+- `cache-first`: no network call is made and the useQuery returns `loading: false` and `data: Categories[]`.
+
+- `cache-and-network`: a network call is made and the useQuery returns `loading: true` and `data: Categories[]`.
+  Once the network request is resolved, the component gets re-rendered with updated data if there are any changes.
+
+- `network-only`: a network call is made and the useQuery returns `loading: true` and `data: undefined` even though the cache has list of categories.
+
+- `no-cache`: a network call is made and the useQuery returns `loading: true` and `data: undefined`, the cache doesn't have list of categories either.
+
+cache and network - checks cache
