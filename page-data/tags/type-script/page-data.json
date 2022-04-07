@@ -1,0 +1,5 @@
+{
+    "componentChunkName": "component---node-modules-lekoarts-gatsby-theme-minimal-blog-core-src-templates-tag-query-tsx",
+    "path": "/tags/type-script",
+    "result": {"data":{"allPost":{"nodes":[{"slug":"/apollo-client-cheatsheet","title":"Apollo Client Cheatsheet","date":"29.12.2021","excerpt":"Disclaimer :  This is a cheatsheet for apollo client, meant to help me quickly lookup the concepts with code snippets.\nMost of the stuff…","timeToRead":5,"description":null,"tags":[{"name":"GraphQL","slug":"graph-ql"},{"name":"TypeScript","slug":"type-script"},{"name":"React","slug":"react"},{"name":"apollo-client","slug":"apollo-client"}]}]}},"pageContext":{"slug":"type-script","name":"TypeScript","formatString":"DD.MM.YYYY"}},
+    "staticQueryHashes": ["2744905544","3090400250","318001574"]}
