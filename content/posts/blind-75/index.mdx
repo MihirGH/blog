@@ -1,6 +1,7 @@
 ---
 title: Blind 75
 date: 2022-04-06
+updatedOn: 2022-08-04
 tags:
   - Blind75
   - LeetCode
@@ -106,3 +107,110 @@ function lengthOfLongestSubstring(s: string): number {
   return answer;
 }
 ```
+
+---
+
+### [Longest palindromic substring](https://leetcode.com/problems/two-sum/)
+
+I was lazy to write all my thoughts on this day since the problem was a bit difficult and I couldn't think about anything other than a bruteforce solution
+
+---
+
+### [Container With Most Water](https://leetcode.com/problems/container-with-most-water/)
+
+You are given an integer array height of length `n`. There are n vertical lines drawn such that the two endpoints of the ith line are `(i, 0)` and `(i, height[i])`.
+
+Find two lines that together with the x-axis form a container, such that the container contains the most water.
+
+Return the maximum amount of water a container can store.
+
+#### Initial Thoughts:
+
+##### Brute force:
+
+Pick all the possible pairs `i` and `j`.
+The answer is not dependent on how tall or short beams lies between them but only on the `heights[i]` and `heights[j]`.
+
+```ts
+let answer = 0;
+for (let i = 0; i < n; i++) {
+  for (let j = i + 1; j < n; j++) {
+    const area = (j - i) * Math.min(heights[i], heights[j]);
+    answer = Math.max(area, answer);
+  }
+}
+return answer;
+```
+
+##### Optimized Approach:
+
+I could come up with this constraint but it wasn't that useful:
+
+> We want to maximise the product of distance between two lines and the difference of heights between two lines
+
+Had to look at hints but still wasn't very clear how I could optimise the brute force solution, Hint:
+
+> Start with the maximum width container and go to a shorter width container if there is a vertical line longer than the current containers shorter line.
+> This way we are compromising on the width but we are looking forward to a longer length container.
+
+After looking at the hint I thought:
+
+For any given range [L, R], we have two choices: [L + 1, R] and [L, R - 1]
+
+- We should move to L + 1 if heights[L] < maxHeights(L + 1, R)
+- We should move to R - 1 if heights[R] < maxHeights(L, R - 1)
+- If heights[L] === heights[R] - we can move to whoever has maximum among maxHeights(L + 1, R), maxHeights(L, R - 1)
+
+And then I got stuck on how to construct the said `maxHeights` function
+
+#### Solution:
+
+Start the left pointer at the beginning and the right pointer at the end
+
+If at any point `heights[l] <= heights[r]` then we move the left pointer by 1 in the right direction. Otherwise we move the right pointer by 1 in the left direction.
+
+##### Proof of correctness:
+
+Suppose our left pointer is at index `i` and our right pointer is at index `j` and `S(i, j)` is the current answer.
+
+Say `heights[i] <= heights[j]` and we move to `S(i + 1, j)`
+In this case, we are omitting `S(i, j - 1)`, `S(i, j - 2)` and so on till `S(i, i + 1)`.
+
+But for all such right pointers we have omitted, the minimum height would be `heights[i]` or even lesser than `heights[i]`.
+Also, the distance would be at least one less than what was between `i` and `j` and hence we are making our area lesser if we had decreased our right pointer in this case.
+Hence, there is no way that the omitted states will have better answer compared to `S(i, j)`.
+
+Same can be said about the other case: `heights[j] < heights[i]` and we move to `S(i, j - 1)`
+In this case we are omitting `S(i + 1, j)`, `S(i + 2, j)` and so on till `S(j - 1, j)`.
+
+But for all such left pointers we have omitted, the minimum height would be `heights[j]` or even lesser than `heights[j]`.
+Also, the distance would be at least one less than what was between `i` and `j` and hence we are only making our area lesser if we had incremented our left pointer in this case.
+Hence, there is no way that the omitted states will have better answer compared to `S(i, j)`.
+
+```ts
+function maxArea(heights: number[]): number {
+  let answer = 0;
+  let leftPointer = 0;
+  let rightPointer = heights.length - 1;
+
+  while (leftPointer < rightPointer) {
+    const distance = rightPointer - leftPointer;
+    answer = Math.max(
+      answer,
+      distance * Math.min(heights[leftPointer], heights[rightPointer])
+    );
+    if (heights[leftPointer] <= heights[rightPointer]) {
+      leftPointer += 1;
+    } else {
+      rightPointer -= 1;
+    }
+  }
+
+  return answer;
+}
+```
+
+> You have two heights `h[l]` and `h[r]`, and `h[l]` < `h[r]`, then we know we have two choices, we want to move one of them. If we move the larger one, we cannot increase the height for the simple reason that we are always limited by the shortest, and we would be decreasing `j - i`, the width as well.
+
+> To clarify: let's say we kept the shortest forever, what would happen? Well, `j - i` would decrease, and either we come across a taller block, which doesn't matter because our shorter one we kept only mattered, or we find a shorter one, in which case that one matters.
+> Either way we end up with a smaller area, so we must move the shorter one because moving the larger one cannot give an increase in area.
