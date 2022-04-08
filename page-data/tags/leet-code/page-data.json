@@ -1,5 +1,5 @@
 {
     "componentChunkName": "component---node-modules-lekoarts-gatsby-theme-minimal-blog-core-src-templates-tag-query-tsx",
     "path": "/tags/leet-code",
-    "result": {"data":{"allPost":{"nodes":[{"slug":"/blind-75","title":"Blind 75","date":"06.04.2022","excerpt":"Two Sum Problem Statement: Given an array of integers  nums  and an integer  target , return indices of the two numbers such that they add…","timeToRead":1,"description":null,"tags":[{"name":"Blind75","slug":"blind-75"},{"name":"LeetCode","slug":"leet-code"}]}]}},"pageContext":{"slug":"leet-code","name":"LeetCode","formatString":"DD.MM.YYYY"}},
+    "result": {"data":{"allPost":{"nodes":[{"slug":"/blind-75","title":"Blind 75","date":"06.04.2022","excerpt":"Two Sum Problem Statement: Given an array of integers  nums  and an integer  target , return indices of the two numbers such that they add…","timeToRead":4,"description":null,"tags":[{"name":"Blind75","slug":"blind-75"},{"name":"LeetCode","slug":"leet-code"}]}]}},"pageContext":{"slug":"leet-code","name":"LeetCode","formatString":"DD.MM.YYYY"}},
     "staticQueryHashes": ["2744905544","3090400250","318001574"]}
