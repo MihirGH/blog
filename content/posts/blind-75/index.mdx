@@ -118,6 +118,8 @@ I was lazy to write all my thoughts on this day since the problem was a bit diff
 
 ### [Container With Most Water](https://leetcode.com/problems/container-with-most-water/)
 
+#### Problem Statement:
+
 You are given an integer array height of length `n`. There are n vertical lines drawn such that the two endpoints of the ith line are `(i, 0)` and `(i, height[i])`.
 
 Find two lines that together with the x-axis form a container, such that the container contains the most water.
@@ -214,3 +216,40 @@ function maxArea(heights: number[]): number {
 
 > To clarify: let's say we kept the shortest forever, what would happen? Well, `j - i` would decrease, and either we come across a taller block, which doesn't matter because our shorter one we kept only mattered, or we find a shorter one, in which case that one matters.
 > Either way we end up with a smaller area, so we must move the shorter one because moving the larger one cannot give an increase in area.
+
+---
+
+### [Trapping Rain Water](https://leetcode.com/problems/trapping-rain-water/)
+
+#### Problem Statement:
+
+Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.
+
+#### Initial Thoughts:
+
+##### Pointer based approach - Failing for a particular edge case :'(
+
+We need to first find the index of the "bar" which has non zero height, say `x`.
+Similarly, we need to find the index of the last bar which has non zero height, say `y`.
+We need to do this because we can't trap the water before these non-zero heighted bars.
+
+We will initialise our left pointer L at `x` and our right pointer R at `x + 1`.
+Now, we will keep increasing our right pointer till we find the first bar which has height greater than height[L].
+The way we have constructed our pointers, right now R is the first index in the [L, R] range for which height[L] < height[R]
+So, we can go ahead and assume a cube from `L + 1` to `R - 1` with length of ((R - 1) - (L + 1) + 1) = (R - L - 1) and height of height[L] and width 1.
+This is the raw volume assuming that in the range `L + 1` to `R - 1` we have zero heighted bars in between.
+We need to compensate for those bars and we will do that by looping from `L + 1` to `R` excluding R and subtracting height of all the bars in between.
+This will give us the water that can be trapped in the range [L, R].
+
+As soon as we have added the amount in the answer, we will set our left pointer to R and right pointer to R + 1 and keep searching for this till our right pointer is less than or equal to `y`.
+
+But there's an edge case in this approach.
+There can be a case where our R has reached `y` but the left pointer `L` is still stuck at the maximum value somewhere.
+We need to count the volume in between if water can be trapped in between.
+The water can only be trapped in this last range if there exists a minima in [L, R] otherwise if it is decreasing then no water can be trapped in between.
+
+Sadly, this is the part where I got stuck and couldn't think of any way to implement this.
+
+#### Final Solution:
+
+I am yet to go through the solution so hopefully I will update it later hopefully!
