@@ -1,0 +1,242 @@
+---
+title: Heap
+date: 2022-04-09
+updatedOn: 2022-08-09
+tags:
+  - Heap
+  - DataStructures
+---
+
+### Heap
+
+#### Introduction:
+
+Heap is a tree-based data structure. It is a complete tree in which all of the nodes of the tree follow specific order. For example, if `X` is the parent of `Y` then the value of `X` follows a specific order with respect to the value of `Y`.
+
+In the context of a binary min-heap, it means that:
+
+- Except leaf nodes, every node will have exactly two children nodes.
+- For each node `X` its value will be less than its children.
+
+#### Insertion of item in the Heap:
+
+Let's say we already have a binary min-heap with N items in it and we want to add one more item in it, say `X`.
+Wt will stick with the order of filling the leaf level from left to right - to keep satisfying the constraint that a heap is a complete tree.
+
+Now to check if the heap order is still preserved after insertion, we need to compare `X`'s value with its parent say `Y`.
+In the context of a binary min-heap, if value of `X` is:
+
+- greater than its parent node then heap order is still preserved because `Y` still is less than both its children.
+  And since we inserted `X` at the leaf level it doesn't have any children and is a valid heap node at the leaf level.
+- less than its parent node then heap order is not preserved because `Y` should be less than both of its children `X'` and `X` but here `X` is less than `Y`.
+
+To restore the heap order, what can we do?
+If look at `X`, its parent `Y` and its sibiling `X'` then we can re-arrange that particular sub-tree with `X` as the new parent node and keep `X'` where it was and `Y` in place of `X`.
+
+Now the heap order is preserved in this new sub-tree, why?
+Since `Y` was already smaller than `X'` and `X` is smaller than `Y`, `X` is also smaller than `X'` (`X < Y` and `Y < X'` hence `X < X'`)
+
+But because of this swapping we may have violated the heap order, why?
+Let's say the parent of `Y` was `Y'` and `Y`'s sibiling was `Z'` and now `Y'` has two children `Z'` and `X`.
+If `X > Y'` then heap order is preserved for `Y'` but if it `X < Y'` then the heap order is not preserved.
+We need to swap `Y'` and `X` again to restore the heap order.
+
+This can go on till we find a parent which is smaller than `X` or X can end up replacing the root if it is the smallest element in the heap till now.
+
+So, the insertion can take up to `O(logN)` in the worst-case when we insert a minimum element in the min-heap.
+
+💡 As a side note, it is worth noting that we will need access to the parent node whenever we insert any element in the heap
+
+- for checking if the heap order is preserved or not and
+- for the above swapping process in case heap order is not preserved and to correct the heap order
+
+#### Deletion of root from the Heap:
+
+Let's say we want to remove the root from the min-heap with `N` items in it.
+Since our heap previously was satisfying the constraint of being a complete binary tree and we always inserted items from left to right in the leaf level, after the removal of the root we can pluck the rightmost element from the leaf and make it the new root.
+This way, we can ensure that the new structure after the removal of the root will still form a complete tree, but the heap order may not be preserved.
+
+We now have to re-arrange the heap so that the heap order is preserved. For this we can do something as follows:
+Consider the new root as `R'` and old children of `R` `X` (left) and `Y` (right).
+We can do two things at this point:
+
+- If `X` < `Y` then we can make `X` the new root of the heap, keep Y as the right children and `R'` as the left children.
+  This will ensure that the right sub-tree of new root follows min-heap properties and we just need to focus on fixing the left sub-tree of the new root.
+- If `Y` < `X` then we can make `Y` the new root of the heap, keep X as the left children and `R'` as the new right children.
+  This will ensure that the left sub-tree of new root follows min-heap properties and we just need to focus on fixing the right sub-tree of the new root.
+
+Recursively, we can keep doing this for each level until we find a proper place for the `R'` to settle, pruning the whole left and right sub-tree as we go down and doing this re-arrangement in logarithmic time.
+In hindsight, plucking the rightmost element from leaf level was the best choice because it allowed us to retain the old min-heap as a complete tree.
+
+#### Internal data structure:
+
+As we saw in the insertion process, we need to get the reference to the parent node from a child node.
+If we are using a non-linear data strcture then we will need to keep a pointer to the parent node from a child node.
+
+Also, as we saw in the deletion process, we need to find the rightmost element in the leaf level.
+If we are using a non-linear data strcture finding this can be a little cumbersome.
+
+So, instead of using a non-linear data structure to model the tree, we use array to store the elements in a tree like fashion.
+
+If we are dealing with binary heaps then we know from the complete tree property that there will be:
+
+- 1 element on the first level
+- 2 elements on the second level
+- 4 elements on the third level
+- 2^k elements on the (k + 1)th level
+
+and so on and so forth.
+
+The above pattern can be flattened into an array as follows:
+
+- Range [0, 0] will be the first level
+- [1, 2] will be the second level
+- [3, 6] will be the third level
+- [2^k - 1, 2^(k + 1) - 2] will be the (k + 1)th the level in general
+
+So the benefits of using the array over non-linear data strcture would be:
+
+- Appending the element in the end will ensure that we are always filling the leaf level from left to right fashion. This also ensures that:
+  - If you're at index `i` then your left child will be at index `2 * i + 1` and the right child will be at index `2 * i + 2`.
+  - If you're not already at the root `(i === 0)` you can look up your parent by checking `arr[(i - 1) / 2]`.
+  - `arr[lastElementIndex]` will give you the rightmost element in the leaf whenever we are removing root node from the heap.
+
+```ts
+type Comparator<T = any> = (
+  a: { value: T; priority: number },
+  b: { value: T; priority: number }
+) => number;
+
+const minHeapComparator = <T = any>(
+  a: { value: T; priority: number },
+  b: { value: T; priority: number }
+) => a.priority - b.priority;
+
+class Heap<T = any> {
+  private heap: Array<{ value: T; priority: number }>;
+  private lastElementIndex: number;
+  private comparator: Comparator<T>;
+
+  static getParentIndex(index: number) {
+    return Math.floor((index - 1) / 2);
+  }
+
+  static getLeftChildIndex(index: number) {
+    return 2 * index + 1;
+  }
+
+  static getRightChildIndex(index: number) {
+    return 2 * index + 2;
+  }
+
+  private getLeftChild(index: number) {
+    const leftChildIndex = Heap.getLeftChildIndex(index);
+    return this.heap[leftChildIndex];
+  }
+
+  private getRightChild(index: number) {
+    const rightChildIndex = Heap.getRightChildIndex(index);
+    return this.heap[rightChildIndex];
+  }
+
+  constructor(comparator: Comparator<T> = minHeapComparator) {
+    this.heap = [];
+    this.lastElementIndex = -1;
+    this.comparator = comparator;
+  }
+
+  insertWithPriority(val: { value: T; priority: number }) {
+    this.heap.push(val);
+    this.lastElementIndex++;
+
+    // Compare with the parent and keep swapping until found a perfect place
+    let currentIndex = this.lastElementIndex;
+    let parentIndex = Heap.getParentIndex(currentIndex);
+
+    // currentNode is to be placed above parentNode
+    while (
+      currentIndex &&
+      this.comparator(this.heap[currentIndex], this.heap[parentIndex]) < 0
+    ) {
+      const temp = this.heap[parentIndex];
+      this.heap[parentIndex] = this.heap[currentIndex];
+      this.heap[currentIndex] = temp;
+
+      currentIndex = parentIndex;
+      parentIndex = Heap.getParentIndex(currentIndex);
+    }
+  }
+
+  removeWithMinimumPriority(): T | null {
+    const lastElement = this.heap.pop();
+    if (!lastElement) return null;
+
+    this.lastElementIndex -= 1;
+    if (this.heap.length === 0) return lastElement.value;
+
+    const rootElement = this.heap[0];
+    this.heap[0] = lastElement;
+
+    let currentIndex = 0;
+
+    let currentNode = this.heap[currentIndex];
+    let leftChild = this.getLeftChild(currentIndex);
+    let rightChild = this.getRightChild(currentIndex);
+
+    while (leftChild && rightChild) {
+      let smallerIndex = currentIndex;
+      let smallerNode = currentNode;
+
+      // currentNode's priority is strictly greater than leftChild's priority
+      if (this.comparator(currentNode, leftChild) < 0) {
+        smallerIndex = Heap.getLeftChildIndex(currentIndex);
+        smallerNode = leftChild;
+        // currentNode's priority is strictly greater than rightChild's priority
+      } else if (this.comparator(currentNode, rightChild) < 0) {
+        smallerIndex = Heap.getRightChildIndex(currentIndex);
+        smallerNode = rightChild;
+      }
+
+      if (smallerIndex === currentIndex) break;
+      // Swap currentIndex with smallerOne
+      this.heap[smallerIndex] = currentNode;
+      this.heap[currentIndex] = smallerNode;
+
+      currentIndex = smallerIndex;
+      currentNode = this.heap[smallerIndex];
+
+      leftChild = this.getLeftChild(currentIndex);
+      rightChild = this.getRightChild(currentIndex);
+    }
+
+    return rootElement.value;
+  }
+
+  peek(): T | null {
+    return this.heap[0] ? this.heap[0].value : null;
+  }
+
+  print() {
+    console.log(this.heap);
+  }
+}
+
+const heap = new Heap<string>();
+
+heap.insertWithPriority({ value: "Lorem", priority: 3 });
+heap.insertWithPriority({ value: "Ipsum", priority: 2 });
+heap.insertWithPriority({ value: "Dolor", priority: 1 });
+heap.insertWithPriority({ value: "Sit", priority: 0 });
+heap.insertWithPriority({ value: "Amet", priority: 4 });
+
+heap.print();
+
+console.log(heap.removeWithMinimumPriority());
+console.log(heap.removeWithMinimumPriority());
+console.log(heap.removeWithMinimumPriority());
+console.log(heap.removeWithMinimumPriority());
+console.log(heap.removeWithMinimumPriority());
+console.log(heap.removeWithMinimumPriority());
+
+heap.print();
+```
