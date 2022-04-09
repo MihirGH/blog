@@ -253,3 +253,141 @@ Sadly, this is the part where I got stuck and couldn't think of any way to imple
 #### Final Solution:
 
 I am yet to go through the solution so hopefully I will update it later hopefully!
+
+---
+
+### [3Sum](https://leetcode.com/problems/3sum/)
+
+#### Problem Statement:
+
+Given an integer array nums, return all the triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.
+
+#### Initial Thoughts:
+
+##### Pointer based approach:
+
+Since we only need to find the triplets and the order doesn't matter, we can sort our array.
+After sorting the array, we can loop from index `i = 0` till `i + 2 < nums.length` and our task boils down to finding two numbers in the remaining sorted array whose sum add upto `-nums[i]`.
+
+This sub-problem can be solved using two pointers where we initialise our left pointer L as `i + 1` and the right pointer R as `nums.length - 1`.
+If `sortedNums[L] + sortedNums[R] > -sortedNums[i]` then that means we have to lower our right pointer because increasing L pointer in this case will only make the sum go high.
+If `sortedNums[L] + sortedNums[R] < -sortedNums[i]` then that means we have to increase our left pointer because decreasing R pointer in this case will only make the sum go down.
+And finally if `sortedNums[L] + sortedNums[R] === sortedNums[i]` then we have found the triplet where `i != L != R` and their sum is 0.
+
+But we still need to get rid of the duplicate triplets. For example, if the `nums` array is `[1, -1, -1, 0]` then our above algorithm will report two triplets `[[-1, 0, 1], [-1, 0, 1]]`.
+This is happening because there are two distinct indices for `-1` which can be paired up with 0 and 1.
+
+So, to remove the duplicate triplets, I came up with a very naive solution:
+I kept track of all pairs seen for a particular `sortedNums[i]` if a triplet was found.
+And if there existed pairs corresponding to `sortedNums[i]` I checked if any of the pair's first number was `sortedNums[leftPointer]`
+If yes then `[sortedNums[i], sortedNums[leftPointer], sortedNums[rightPointer]]` is already "seen" and has already been added to the answer and we can ignore this.
+
+```ts
+function threeSum(nums: number[]): number[][] {
+  const answer: number[][] = [];
+  const sortedNums = [...nums].sort((a, b) => a - b);
+  const seenPairs = new Map<number, number[][]>();
+
+  for (let i = 0; i < sortedNums.length; i++) {
+    let leftPointer = i + 1;
+    let rightPointer = sortedNums.length - 1;
+    const firstElement = sortedNums[i];
+    let remainingSum = -firstElement;
+
+    while (leftPointer < rightPointer) {
+      if (sortedNums[leftPointer] + sortedNums[rightPointer] === remainingSum) {
+        const pairs = seenPairs.get(firstElement) || [];
+        const pairWithLeftPointerExists = pairs.length
+          ? pairs.some((pair) => pair[0] === sortedNums[leftPointer])
+          : false;
+
+        if (!pairWithLeftPointerExists) {
+          seenPairs.set(firstElement, [
+            ...pairs,
+            [sortedNums[leftPointer], sortedNums[rightPointer]],
+          ]);
+          answer.push([
+            sortedNums[i],
+            sortedNums[leftPointer],
+            sortedNums[rightPointer],
+          ]);
+        }
+
+        leftPointer += 1;
+        rightPointer -= 1;
+        continue;
+      }
+      if (sortedNums[leftPointer] + sortedNums[rightPointer] > remainingSum) {
+        rightPointer -= 1;
+      } else {
+        leftPointer += 1;
+      }
+    }
+  }
+
+  return answer;
+}
+```
+
+This solution is not memory efficient and may add extra overhead too when we are comparing it will all the "seen" triplets but it works.
+
+#### Final Solution:
+
+An important thing to note here is that the triplet can only be repeated if we have multiple entries for either `nums[i]` or `nums[leftPointer]` or `nums[rightPointer]` or all of the three. So, we can do a little bit better by:
+
+- Moving `i` to the _last occurrence_ for that particular number.
+- Once found the answer:
+  - Keep increasing L so that we skip all multiple entries for `sortedNums[L]`.
+  - Keep decreasing R so that we skip all multiple entries for `sortedNums[R]`.
+    and resume the search in now updated [L, R] range.
+
+```ts
+function threeSum(nums: number[]): number[][] {
+  const answer: number[][] = [];
+  const sortedNums = [...nums].sort((a, b) => a - b);
+
+  for (let i = 0; i + 2 < sortedNums.length; i++) {
+    // Skip same result
+    if (i > 0 && sortedNums[i] === sortedNums[i - 1]) continue;
+
+    let leftPointer = i + 1;
+    let rightPointer = sortedNums.length - 1;
+    const firstElement = sortedNums[i];
+    let remainingSum = -firstElement;
+
+    while (leftPointer < rightPointer) {
+      if (sortedNums[leftPointer] + sortedNums[rightPointer] === remainingSum) {
+        answer.push([
+          sortedNums[i],
+          sortedNums[leftPointer],
+          sortedNums[rightPointer],
+        ]);
+
+        leftPointer += 1;
+        rightPointer -= 1;
+
+        // Skip same result
+        while (
+          leftPointer < rightPointer &&
+          sortedNums[rightPointer] === sortedNums[rightPointer + 1]
+        )
+          rightPointer -= 1;
+        while (
+          leftPointer < rightPointer &&
+          sortedNums[leftPointer] === sortedNums[leftPointer - 1]
+        )
+          leftPointer += 1;
+
+        continue;
+      }
+      if (sortedNums[leftPointer] + sortedNums[rightPointer] > remainingSum) {
+        rightPointer -= 1;
+      } else {
+        leftPointer += 1;
+      }
+    }
+  }
+
+  return answer;
+}
+```
