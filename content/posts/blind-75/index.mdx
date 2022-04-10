@@ -276,3 +276,33 @@ An important thing to note here is that the triplet can only be repeated if we h
     and resume the search in now updated [L, R] range.
 
 The code for this appproach can be found [here](https://leetcode.com/submissions/detail/676762008/).
+
+---
+
+### [Top k frequent elements](https://leetcode.com/problems/top-k-frequent-elements/)
+
+Given an integer array `nums` and an integer `k`, return `the k` most frequent elements.
+You may return the answer in any order.
+
+#### Initial Thoughts:
+
+##### Using Map to count frequency and then using buckets to store numbers with a particular frequency:
+
+Loop through all the numbers in the `nums` array and maintain a `numberToFrequency` map.
+Make an array of size `1 + nums.length` and call it `frequencyToNumbers`, the entries will be an array of integers itself.
+This will essentially serve as a reverse lookup table where the index will be a particular frequency and we will get how many numbers were preesnt in `nums` array with that particular frequency.
+Once the said array is constructed, we will initialise an `answer` array and we will loop through the `frequencyToNumbers` array it the reverse order - starting from the highest frequency till the frequency 1 and keep pushing all the elements for a particular frequency in the `answer` array.
+We will keep pushing till the size of the answer array is not equal to k.
+
+Time complexity: `O(N)` to construct `numberToFrequency` map plus `O(N)` to construct the `frequencyToNumbers` array and then `O(N)` in the worst case to loop through the `frequencyToNumbers` array and filling up the `answer` array.
+
+Space complexity: `O(N)` for `numberToFrequency` map plus `O(N)` to for the `frequencyToNumbers` array.
+
+The code for this approach can be found [here](https://leetcode.com/submissions/detail/676792991/).
+
+#### Final Solution:
+
+##### Using Heap:
+
+We can also solve this using Heap datastructure. The detailed explanation of the heap datastructure can be found [here](./heap).
+There you can also find the solution of this problem using heaps.
