@@ -250,3 +250,27 @@ console.log(heap.removeRoot());
 
 heap.print();
 ```
+
+#### Heap based questions:
+
+##### [Top k frequent elements](https://leetcode.com/problems/top-k-frequent-elements/)
+
+**Problem Statement:**
+
+Given an integer array `nums` and an integer `k`, return `the k` most frequent elements.
+You may return the answer in any order.
+
+**Solution:**
+
+We can use MaxHeap here.
+We will put each element from `nums` array and we will use its frequency as the priority for the MaxHeap.
+
+This way, we will be have most frequent element at the root of the MaxHeap and when we remove from the MaxHeap first time.
+When we remove the element again from the MaxHeap, we will get the second most frequent element.
+We can perform the remove operation `k` times and we will end up with the top k frequent elements.
+
+💡 _We don't necessarily have to use MaxHeap here.
+We can use the MinHeap here as well and assign negative of the frequency as the priority.
+This way, the element with the highest frequency will have the lowest priority and it will be at the root of the heap when we perform remove operation in the MinHeap._
+
+The code for the solution of this problem with MinHeap can be found [here](https://leetcode.com/submissions/detail/677538919/).
