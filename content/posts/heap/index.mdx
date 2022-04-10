@@ -202,7 +202,7 @@ class Heap<T = any> {
     }
   }
 
-  removeWithMinimumPriority(): T | null {
+  removeRoot(): T | null {
     const lastElement = this.heap.pop();
     if (!lastElement) return null;
 
@@ -222,6 +222,10 @@ class Heap<T = any> {
     return this.heap[0] ? this.heap[0].value : null;
   }
 
+  size(): number {
+    return this.heap.length;
+  }
+
   print() {
     console.log(JSON.stringify(this.heap, null, 2));
   }
@@ -237,12 +241,12 @@ heap.insertWithPriority({ value: "Amet", priority: 4 });
 
 heap.print();
 
-console.log(heap.removeWithMinimumPriority());
-console.log(heap.removeWithMinimumPriority());
-console.log(heap.removeWithMinimumPriority());
-console.log(heap.removeWithMinimumPriority());
-console.log(heap.removeWithMinimumPriority());
-console.log(heap.removeWithMinimumPriority());
+console.log(heap.removeRoot());
+console.log(heap.removeRoot());
+console.log(heap.removeRoot());
+console.log(heap.removeRoot());
+console.log(heap.removeRoot());
+console.log(heap.removeRoot());
 
 heap.print();
 ```
