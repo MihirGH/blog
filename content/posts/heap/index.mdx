@@ -167,6 +167,41 @@ class Heap<T = any> {
     }
   }
 
+  heapifyDown(): T | null {
+    let currentIndex = 0;
+
+    let currentNode = this.heap[currentIndex];
+    let leftChild = this.getLeftChild(currentIndex);
+    let rightChild = this.getRightChild(currentIndex);
+
+    while (leftChild) {
+      let leftChildIndex = Heap.getLeftChildIndex(currentIndex);
+      let rightChildIndex = Heap.getRightChildIndex(currentIndex);
+
+      let smallerChildIndex = leftChildIndex;
+      let smallerChildNode = leftChild;
+
+      // rightChild's priority is less than leftChild's priority
+      if (rightChild && this.comparator(rightChild, leftChild) < 0) {
+        smallerChildIndex = rightChildIndex;
+        smallerChildNode = rightChild;
+      }
+
+      // currentNode's priority is less than its smaller child
+      // Heap order is preserved, no need to do anything beyond this
+      if (this.comparator(currentNode, smallerChildNode) < 0) break;
+
+      // Swap currentIndex with smallerOne
+      this.heap[currentIndex] = smallerChildNode;
+      this.heap[smallerChildIndex] = currentNode;
+
+      // Update loop variables
+      currentIndex = smallerChildIndex;
+      leftChild = this.getLeftChild(currentIndex);
+      rightChild = this.getRightChild(currentIndex);
+    }
+  }
+
   removeWithMinimumPriority(): T | null {
     const lastElement = this.heap.pop();
     if (!lastElement) return null;
@@ -175,39 +210,10 @@ class Heap<T = any> {
     if (this.heap.length === 0) return lastElement.value;
 
     const rootElement = this.heap[0];
+
+    // Bring the right-most element (last element) to the root
     this.heap[0] = lastElement;
-
-    let currentIndex = 0;
-
-    let currentNode = this.heap[currentIndex];
-    let leftChild = this.getLeftChild(currentIndex);
-    let rightChild = this.getRightChild(currentIndex);
-
-    while (leftChild && rightChild) {
-      let smallerIndex = currentIndex;
-      let smallerNode = currentNode;
-
-      // currentNode's priority is strictly greater than leftChild's priority
-      if (this.comparator(currentNode, leftChild) < 0) {
-        smallerIndex = Heap.getLeftChildIndex(currentIndex);
-        smallerNode = leftChild;
-        // currentNode's priority is strictly greater than rightChild's priority
-      } else if (this.comparator(currentNode, rightChild) < 0) {
-        smallerIndex = Heap.getRightChildIndex(currentIndex);
-        smallerNode = rightChild;
-      }
-
-      if (smallerIndex === currentIndex) break;
-      // Swap currentIndex with smallerOne
-      this.heap[smallerIndex] = currentNode;
-      this.heap[currentIndex] = smallerNode;
-
-      currentIndex = smallerIndex;
-      currentNode = this.heap[smallerIndex];
-
-      leftChild = this.getLeftChild(currentIndex);
-      rightChild = this.getRightChild(currentIndex);
-    }
+    this.heapifyDown();
 
     return rootElement.value;
   }
@@ -217,7 +223,7 @@ class Heap<T = any> {
   }
 
   print() {
-    console.log(this.heap);
+    console.log(JSON.stringify(this.heap, null, 2));
   }
 }
 
