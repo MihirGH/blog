@@ -189,28 +189,7 @@ But for all such left pointers we have omitted, the minimum height would be `hei
 Also, the distance would be at least one less than what was between `i` and `j` and hence we are only making our area lesser if we had incremented our left pointer in this case.
 Hence, there is no way that the omitted states will have better answer compared to `S(i, j)`.
 
-```ts
-function maxArea(heights: number[]): number {
-  let answer = 0;
-  let leftPointer = 0;
-  let rightPointer = heights.length - 1;
-
-  while (leftPointer < rightPointer) {
-    const distance = rightPointer - leftPointer;
-    answer = Math.max(
-      answer,
-      distance * Math.min(heights[leftPointer], heights[rightPointer])
-    );
-    if (heights[leftPointer] <= heights[rightPointer]) {
-      leftPointer += 1;
-    } else {
-      rightPointer -= 1;
-    }
-  }
-
-  return answer;
-}
-```
+The code for this approach can be found [here](https://leetcode.com/submissions/detail/676191292/).
 
 > You have two heights `h[l]` and `h[r]`, and `h[l]` < `h[r]`, then we know we have two choices, we want to move one of them. If we move the larger one, we cannot increase the height for the simple reason that we are always limited by the shortest, and we would be decreasing `j - i`, the width as well.
 
@@ -282,54 +261,9 @@ I kept track of all pairs seen for a particular `sortedNums[i]` if a triplet was
 And if there existed pairs corresponding to `sortedNums[i]` I checked if any of the pair's first number was `sortedNums[leftPointer]`
 If yes then `[sortedNums[i], sortedNums[leftPointer], sortedNums[rightPointer]]` is already "seen" and has already been added to the answer and we can ignore this.
 
-```ts
-function threeSum(nums: number[]): number[][] {
-  const answer: number[][] = [];
-  const sortedNums = [...nums].sort((a, b) => a - b);
-  const seenPairs = new Map<number, number[][]>();
-
-  for (let i = 0; i < sortedNums.length; i++) {
-    let leftPointer = i + 1;
-    let rightPointer = sortedNums.length - 1;
-    const firstElement = sortedNums[i];
-    let remainingSum = -firstElement;
-
-    while (leftPointer < rightPointer) {
-      if (sortedNums[leftPointer] + sortedNums[rightPointer] === remainingSum) {
-        const pairs = seenPairs.get(firstElement) || [];
-        const pairWithLeftPointerExists = pairs.length
-          ? pairs.some((pair) => pair[0] === sortedNums[leftPointer])
-          : false;
-
-        if (!pairWithLeftPointerExists) {
-          seenPairs.set(firstElement, [
-            ...pairs,
-            [sortedNums[leftPointer], sortedNums[rightPointer]],
-          ]);
-          answer.push([
-            sortedNums[i],
-            sortedNums[leftPointer],
-            sortedNums[rightPointer],
-          ]);
-        }
-
-        leftPointer += 1;
-        rightPointer -= 1;
-        continue;
-      }
-      if (sortedNums[leftPointer] + sortedNums[rightPointer] > remainingSum) {
-        rightPointer -= 1;
-      } else {
-        leftPointer += 1;
-      }
-    }
-  }
-
-  return answer;
-}
-```
-
 This solution is not memory efficient and may add extra overhead too when we are comparing it will all the "seen" triplets but it works.
+
+The code for this naive approach can be found [here](https://leetcode.com/submissions/detail/676754690/).
 
 #### Final Solution:
 
@@ -341,53 +275,4 @@ An important thing to note here is that the triplet can only be repeated if we h
   - Keep decreasing R so that we skip all multiple entries for `sortedNums[R]`.
     and resume the search in now updated [L, R] range.
 
-```ts
-function threeSum(nums: number[]): number[][] {
-  const answer: number[][] = [];
-  const sortedNums = [...nums].sort((a, b) => a - b);
-
-  for (let i = 0; i + 2 < sortedNums.length; i++) {
-    // Skip same result
-    if (i > 0 && sortedNums[i] === sortedNums[i - 1]) continue;
-
-    let leftPointer = i + 1;
-    let rightPointer = sortedNums.length - 1;
-    const firstElement = sortedNums[i];
-    let remainingSum = -firstElement;
-
-    while (leftPointer < rightPointer) {
-      if (sortedNums[leftPointer] + sortedNums[rightPointer] === remainingSum) {
-        answer.push([
-          sortedNums[i],
-          sortedNums[leftPointer],
-          sortedNums[rightPointer],
-        ]);
-
-        leftPointer += 1;
-        rightPointer -= 1;
-
-        // Skip same result
-        while (
-          leftPointer < rightPointer &&
-          sortedNums[rightPointer] === sortedNums[rightPointer + 1]
-        )
-          rightPointer -= 1;
-        while (
-          leftPointer < rightPointer &&
-          sortedNums[leftPointer] === sortedNums[leftPointer - 1]
-        )
-          leftPointer += 1;
-
-        continue;
-      }
-      if (sortedNums[leftPointer] + sortedNums[rightPointer] > remainingSum) {
-        rightPointer -= 1;
-      } else {
-        leftPointer += 1;
-      }
-    }
-  }
-
-  return answer;
-}
-```
+The code for this appproach can be found [here](https://leetcode.com/submissions/detail/676762008/).
