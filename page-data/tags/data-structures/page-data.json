@@ -1,5 +1,5 @@
 {
     "componentChunkName": "component---node-modules-lekoarts-gatsby-theme-minimal-blog-core-src-templates-tag-query-tsx",
     "path": "/tags/data-structures",
-    "result": {"data":{"allPost":{"nodes":[{"slug":"/heap","title":"Heap","date":"09.04.2022","excerpt":"Heap Introduction: Heap is a tree-based data structure. It is a complete tree in which all of the nodes of the tree follow specific order…","timeToRead":4,"description":null,"tags":[{"name":"Heap","slug":"heap"},{"name":"DataStructures","slug":"data-structures"}]}]}},"pageContext":{"slug":"data-structures","name":"DataStructures","formatString":"DD.MM.YYYY"}},
+    "result": {"data":{"allPost":{"nodes":[{"slug":"/heap","title":"Heap","date":"09.04.2022","excerpt":"Heap Introduction: Heap is a tree-based data structure. It is a complete tree in which all of the nodes of the tree follow specific order…","timeToRead":5,"description":null,"tags":[{"name":"Heap","slug":"heap"},{"name":"DataStructures","slug":"data-structures"}]}]}},"pageContext":{"slug":"data-structures","name":"DataStructures","formatString":"DD.MM.YYYY"}},
     "staticQueryHashes": ["2744905544","3090400250","318001574"]}
