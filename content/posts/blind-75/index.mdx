@@ -315,3 +315,25 @@ There you can also find the solution of this problem using heaps.
 ### [Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list)
 
 The detailed solution for this problem can be found in this [post](./linked-list)
+
+---
+
+### [Valid Parentheses](https://leetcode.com/problems/valid-parentheses/)
+
+#### Problem Statement:
+
+Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
+
+An input string is valid if:
+
+- Open brackets must be closed by the same type of brackets.
+- Open brackets must be closed in the correct order.
+
+#### Solution:
+
+This is the classic example of how Stack can be used. Whenever we encounter a closing bracket, we need to check it with the last opening bracket.
+To remeber the last opening bracket, we can use the Stack data structure and whenever we encounter an opening bracket, we just push it on the stack to retrieve it later.
+
+In the end, we just need to check if there are no opening brackets left in the stack - if there are, then that means that we have excess of opening brackets and string is not valid.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/678087340/).
