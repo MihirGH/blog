@@ -84,28 +84,7 @@ We then travese to the node positioned at `n - 1` - the node just previous to th
 
 After we are done, we can simply return `getReversedLinkedList(reversedHead)` that will give us the head of the linked list in the order we received it in input.
 
-```ts
-function removeNthFromEnd(head: ListNode | null, n: number): ListNode | null {
-  if (!head) return null;
-  const reversedHead = getReversedLinkedList(head);
-  if (n === 1) return getReversedLinkedList(reversedHead.next);
-
-  let currentNode = reversedHead;
-  let prevNode = null;
-  let position = 1;
-
-  while (currentNode) {
-    // If the next node is to be removed or not
-    if (position === n - 1) {
-      currentNode.next = currentNode.next ? currentNode.next.next : null;
-    }
-    currentNode = currentNode.next;
-    position += 1;
-  }
-
-  return getReversedLinkedList(reversedHead);
-}
-```
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/677733142/)
 
 **Solution using two pointers**:
 
