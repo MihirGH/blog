@@ -352,7 +352,7 @@ Return the head of the merged linked list.
 
 #### Solution:
 
-First of all, we start by creating a dummy node for the merged list will - `mergedListHead`.
+First of all, we start by creating a dummy node for the merged list - `mergedListHead`.
 We initialise a `firstPointer` by setting it to point to the head of the first list and similarly initialise `secondPointer` by setting it to point to the head of the second list.
 We also keep a `lastNode` to point to the last node we have inserted in the merged list and initialise it by setting it to `mergedListHead`.
 
@@ -366,3 +366,32 @@ During each iteration, we check:
 If either of the `firstPointer` or `secondPointer` has reached `null`, we make sure to add all the nodes from the remaining list so that we cover all the elements.
 
 The code for the above approach can be found [here](https://leetcode.com/submissions/detail/678097421/).
+
+---
+
+### [Merge `k` Sorted Lists](https://leetcode.com/problems/merge-k-sorted-lists/)
+
+#### Problem Statement:
+
+You are given an array of `k` linked-lists `lists`, each linked-list is sorted in ascending order.
+
+_Merge all the linked-lists into one sorted linked-list and return it._
+
+#### Solution:
+
+##### Brute Force solution:
+
+First of all, we start by creating a dummy node for the merged list - `mergedListHead`.
+We also keep a pointer `lastInsertedNode` and initialise it with `mergedListHead`.
+
+Then, during each iteration, we start by finding the minimum out of all `k` lists' head say `minimumNode` and the list's index in the original `lists` array say `min`.
+We insert the said minimum node in the list by setting `lastInsertedNode.next` to `minimumNode`.
+We update the `lastInsertedNode` as `minimumNode` and we go to the `lists[min]` and set it to `lists[min].next` and essentially popping it out.
+
+Time complexity: `O(kN)` where N is the total number of nodes in all the lists combined. The factor of `k` comes in because for inserting each node we have to go and compare all `k` heads of all lists.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/678113739/).
+
+##### Optimized solution using MinHeap:
+
+The detailed explanation of the MinHeap datastructure and the solution using MinHeap can be found [here](./heap).

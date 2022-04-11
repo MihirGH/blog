@@ -254,6 +254,8 @@ console.log(heap.removeRoot());
 heap.print();
 ```
 
+---
+
 #### Heap based questions:
 
 ##### [Top k frequent elements](https://leetcode.com/problems/top-k-frequent-elements/)
@@ -277,3 +279,33 @@ We can use the MinHeap here as well and assign negative of the frequency as the 
 This way, the element with the highest frequency will have the lowest priority and it will be at the root of the heap when we perform remove operation in the MinHeap._
 
 The code for the solution of this problem with MinHeap can be found [here](https://leetcode.com/submissions/detail/677538919/).
+
+---
+
+##### [Merge `k` Sorted Lists](https://leetcode.com/problems/merge-k-sorted-lists/)
+
+**Problem Statement:**
+
+You are given an array of `k` linked-lists `lists`, each linked-list is sorted in ascending order.
+
+_Merge all the linked-lists into one sorted linked-list and return it._
+
+**Solution:**
+
+First of all, we start by creating a dummy node for the merged list - `mergedListHead`.
+We also keep a pointer `lastInsertedNode` and initialise it with `mergedListHead`.
+
+Then we put all the heads of the lists in a MinHeap where each node's priority will be decided by that particualr node's value.
+
+Then, we iterate till our heap does not get empty.
+In each iteration, we remove the lowest priority element from heap.
+We make our `lastInsertedNode` point to this minimum value node.
+We update our `lastInsertedNode` and we then add the removed node's next node to keep things moving.
+
+Time complexity: `O(klogk)` to first make the heap.
+
+Explanation: Since we are removing the minimum element out of `k` elements in the heap in each iteration, it will take `O(logk)` time.
+We also put an item in the heap after removal which will take `O(logk)` time.
+And we are doing this for all of the `N` elements so overall it will take `O(Nlogk)` time.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/678146556/).
