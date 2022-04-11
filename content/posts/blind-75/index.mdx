@@ -337,3 +337,32 @@ To remeber the last opening bracket, we can use the Stack data structure and whe
 In the end, we just need to check if there are no opening brackets left in the stack - if there are, then that means that we have excess of opening brackets and string is not valid.
 
 The code for the above approach can be found [here](https://leetcode.com/submissions/detail/678087340/).
+
+---
+
+### [Merge Two Sorted Lists](https://leetcode.com/problems/merge-two-sorted-lists/)
+
+#### Problem Statement:
+
+You are given the heads of two sorted linked lists `list1` and `list2`.
+
+Merge the two lists in a one sorted list. The list should be made by splicing together the nodes of the first two lists.
+
+Return the head of the merged linked list.
+
+#### Solution:
+
+First of all, we start by creating a dummy node for the merged list will - `mergedListHead`.
+We initialise a `firstPointer` by setting it to point to the head of the first list and similarly initialise `secondPointer` by setting it to point to the head of the second list.
+We also keep a `lastNode` to point to the last node we have inserted in the merged list and initialise it by setting it to `mergedListHead`.
+
+Then, we start looping till we have traversed both the lists and added all nodes in the merged list.
+During each iteration, we check:
+
+- If we have firstPointer and secondPointer we make `lastNode.next` point to the smaller of these two.
+- Then we set the `lastNode` to point to the smaller node that we have just inserted.
+- And at last, to keep things moving, we increment the smaller node to point to its next node.
+
+If either of the `firstPointer` or `secondPointer` has reached `null`, we make sure to add all the nodes from the remaining list so that we cover all the elements.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/678097421/).
