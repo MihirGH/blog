@@ -1,0 +1,123 @@
+---
+title: Linked List
+date: 2022-04-10
+updatedOn: 2022-04-10
+description: A blog about the Linked List data structure, and collection of techniques to solve variations of questions based on Linked List and all the sample problems on Blind75 list around it
+tags:
+  - DataStructures
+  - Algorithms
+  - Blind75
+  - LeetCode
+---
+
+### Linked List
+
+#### Introduction:
+
+A Linked List is a linear data strcture like arrays but what sets it apart from arrays is that the data is not stored in contiguous manner in the memory.
+
+In Linked List, the building block that stores the data is called a _Node_.
+Apart from storing the data, a node also stores the reference to the next node in the sequence.
+
+The first element of the Linked List is called _head_ node and one can travese through the whole linked list sequentially by going through the next nodes pointed from a particular node starting from the head node.
+The last element of the Linked List has a special property that it doesn't point to any further node, it points to `null`, marking the end of the list.
+
+Since a particular node is only reachable by its previous node, a direct access to a particular node isn't possible in Linked List unlike arrays and that's the biggest difference.
+
+#### Insertion:
+
+To insert an element in the Linked List one has to travese to the last element of the Linked List starting from the head.
+Then, one can create a new node, make it point to `null` (marking it as the new last element of the list) and make the last node point to this newly created node.
+
+#### Deletion:
+
+To delete an element `el` from the Linked List we first need to find an element say `prevEl` whose `next` property references to el i.e., `prevEl.next === el`.
+Then one can simply make `prevEl`'s `next` property refer to the `el`'s `next` property.
+Hence, esentially removing the connection between `prevEl` and `el` by overwriting `prevEl.next` and making a new connection between `prevEl` and `el.next`.
+
+#### Reversing a Linked List:
+
+When we reverse a linked list, the tail becomes the new head and the head becomes the new tail.
+We can achieve this by traversing the linked list with the help of two pointers, `currentEl` and `prevEl`.
+We start by setting the `currentEl` to head of the linked list and `prevEl` to `null`.
+
+Now, whenever we are at a particular element, what we do is:
+
+- Store its next element in a temporary variable called `nextEl`
+- Make `currentEl`'s next point to the `previousEl`
+- And then making `currentEl` jump to the next element in the original list by setting it to `nextEl`
+
+```ts
+function getReversedLinkedList(head: ListNode | null): ListNode {
+  let currentNode = head;
+  let prevNode = null;
+
+  while (currentNode) {
+    const nextNode = currentNode.next;
+    // Point current's next to point to prev pointer
+    currentNode.next = prevNode;
+    // Update current and prev pointers
+    prevNode = currentNode;
+    currentNode = nextNode;
+  }
+
+  return prevNode;
+}
+```
+
+#### Linked List based questions:
+
+##### [Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list)
+
+**Problem Statement:**
+
+Given the head of a linked list, remove the nth node from the end of the list and return its head.
+
+**Naive Solution:**
+
+We can first reverse the linked list and get `reversedHead = getReversedLinkedList(head)` pointer.
+If `n === 1` then we can simply remove the `reversedHead` from the linked list by setting `reversedHead = reversedHead.next`.
+Finally, we can return this reversed linked list's reversed linked list's head: basically, `return getReversedLinkedList(reversedHead)`.
+
+If `n > 1` then we start traversing from `reversedHead` till the end of the reversed linked list and keep a `position` pointer.
+We then travese to the node positioned at `n - 1` - the node just previous to the one we want to delete and simply skip over the nth node from (n - 1)th node by making (n - 1)th node point to nth node's next node.
+
+After we are done, we can simply return `getReversedLinkedList(reversedHead)` that will give us the head of the linked list in the order we received it in input.
+
+```ts
+function removeNthFromEnd(head: ListNode | null, n: number): ListNode | null {
+  if (!head) return null;
+  const reversedHead = getReversedLinkedList(head);
+  if (n === 1) return getReversedLinkedList(reversedHead.next);
+
+  let currentNode = reversedHead;
+  let prevNode = null;
+  let position = 1;
+
+  while (currentNode) {
+    // If the next node is to be removed or not
+    if (position === n - 1) {
+      currentNode.next = currentNode.next ? currentNode.next.next : null;
+    }
+    currentNode = currentNode.next;
+    position += 1;
+  }
+
+  return getReversedLinkedList(reversedHead);
+}
+```
+
+**Solution using two pointers**:
+
+The above solution works but we are traversing the linked list 3 times.
+One for reversing the original list, one for removing the element from the reversed list and one for reversing the reversed linked list.
+Instead, we can solve this by traversing the linked list only once, How?
+
+We initialise two pointers - `leftPointer` which points to the `head` and a `rightPointer` which is ahead by the `leftPointer` by a distance of `n`.
+This way, whenever our `rightPointer` reaches `null` our `leftPointer` will be at the node we want to remove since it will be exactly `n` steps behind from the end.
+If we go by this approach, we will also need to keep a `previousPointer` for our `leftPointer` so we can make our `previousPointer` skip `leftPointer` when our `rightPointer` has reached null and left is at the node we want to delete.
+
+But, rather than comparing `rightPointer` with `null` we can modify the condition by checking if `rightPointer` is at the last node of the linked list, meaning `rightPointer.next === null`.
+This way `leftPointer` will be at the node just before the one that needs to be deleted and we can skip over the node we want to delete without maintaining the `previousPointer`!
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/678077932/)
