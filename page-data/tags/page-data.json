@@ -1,5 +1,5 @@
 {
     "componentChunkName": "component---node-modules-lekoarts-gatsby-theme-minimal-blog-core-src-templates-tags-query-tsx",
     "path": "/tags",
-    "result": {"data":{"allPost":{"group":[{"fieldValue":"Algorithms","totalCount":3},{"fieldValue":"Blind75","totalCount":3},{"fieldValue":"DataStructures","totalCount":3},{"fieldValue":"GraphQL","totalCount":1},{"fieldValue":"LeetCode","totalCount":3},{"fieldValue":"React","totalCount":1},{"fieldValue":"TypeScript","totalCount":1},{"fieldValue":"apollo-client","totalCount":1}]}},"pageContext":{}},
+    "result": {"data":{"allPost":{"group":[{"fieldValue":"Algorithms","totalCount":4},{"fieldValue":"BinarySearch","totalCount":1},{"fieldValue":"Blind75","totalCount":4},{"fieldValue":"DataStructures","totalCount":4},{"fieldValue":"GraphQL","totalCount":1},{"fieldValue":"LeetCode","totalCount":4},{"fieldValue":"React","totalCount":1},{"fieldValue":"TypeScript","totalCount":1},{"fieldValue":"apollo-client","totalCount":1}]}},"pageContext":{}},
     "staticQueryHashes": ["2744905544","3090400250","318001574"]}
