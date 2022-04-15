@@ -1,0 +1,324 @@
+---
+title: How to reason about Binary Search properly
+description: All the possible variations of Binary Search algorithm and mathematical proof of correctness for each of the variation.
+date: 2022-04-15
+tags:
+  - DataStructures
+  - Algorithms
+  - Blind75
+  - LeetCode
+  - BinarySearch
+---
+
+## 1) Find the index of an element in a sorted array without duplicates:
+
+### Code:
+
+```ts
+function findIndex(arr: number[], target: number): number {
+  let low = 0;
+  let high = arr.length - 1;
+
+  while (low <= high) {
+    const mid = low + Math.floor((high - low) / 2);
+    if (arr[mid] === target) return mid;
+    if (arr[mid] > target) {
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return -1;
+}
+```
+
+### Invariants:
+
+**Invariant**: If `target` is in `arr` then there exists at least one valid range `[low, high]` where `low <= indexOf(target) <= high` and `arr[low] <= target <= arr[high]`.
+
+If `target` is not in `arr` then there doesn't exist any such valid range `[low, high]`.
+
+#### Proving Invariant:
+
+Before entering the loop, if `target` exists in `arr` then the range `[0, arr.length - 1]` will definitely contain it.
+
+##### `arr[mid] == target` branch:
+
+Inside the loop, if `arr[mid] == target` then we have found the index of `target` in our `arr` and we don't care about the invariant any more since we don't need to search any more and we don't need to shorten the current range under consideration.
+
+##### `arr[mid] > target` branch:
+
+Since `arr[mid] > target` then for all index `i > mid`, `arr[i] > arr[mid] > target` (assuming all distinct elements in the array) and hence it is futile to search in the range `[mid, high]`.
+
+So when we set `high` to `mid - 1`, our invariant still holds true. If `target` is in `arr` then it will be found in the updated range `[low, mid - 1]`.
+
+##### `arr[mid] < target` branch:
+
+Since `arr[mid] < target` then `i < mid`, `arr[i] < arr[mid] < target` (assuming all distinct elements in the array) and hence it is futile to search in the range `[low, mid]`.
+
+So when we set `low` to `mid + 1` our invariant still holds true. If `target` is in `arr` then it will be found in the updated range `[mid + 1, high]`.
+
+### Bound function:
+
+A monotonically decreasing function of the `low` and `high` variables of our range ensures that we eventually terminate the loop and we don't get stuck in the infinite loop.
+
+A good candidate for the bound function is the size of the search space/range = `high - low + 1`
+
+At each step of the iteration, we are shortening our search space by at least one. But how do we mathematically prove this?
+
+An important thing to note here is that `mid <= high`. This is true because `low <= high` according to our loop condition.
+
+And hence, `low + high <= high + high`. Therefore `Math.floor((low + high) / 2) <= high` which proves `mid <= high`.
+
+When we set the `low` to `mid + 1`, new search space size is `high - (mid + 1) + 1` = `high - mid` and since `low <= mid` and when we invert the inequality we get `-low >= -mid` and `high - low >= high - mid` and `high - low + 1 > high - mid`. So our new search space size is strictly smaller for this branch.
+
+When we set `high` to `mid - 1`, new search space size is `(mid - 1) - low + 1` = `mid - low`. Since `mid <= high` and `mid - low <= high - low` and `mid - low < high - low + 1`. So our new search space size is smaller for this branch as well.
+
+### Proof of correctness:
+
+This is where defining the correct invariant and maintaining the invariant really shines.
+
+If `target` existed in `arr` then by our invariant and bound function we would have eventually reached a range such that `low == high == mid` for which `arr[low] <= target <= arr[high]` and since `low == high == mid` we would have returned that mid as answer.
+
+Eventually, we will break out of the loop when `low > high` and that will happen only after we have searched for the smallest possible range which is `low == high == mid` and for that valid search space, if `arr[mid]` was equal to `target` then we would've returned from the function then and there. The fact that we didn't return from the function means that we have exhausted all valid search spaces.
+
+So when we break out of loop, we can return `-1` stating element didn't exist in array.
+
+---
+
+## 2) Find the index of an element's first occurrence in a sorted array (with duplicates):
+
+### Code:
+
+```ts
+function findFirstOccurrence(arr: number[], target: number): number {
+  let low = 0;
+  let high = arr.length - 1;
+  let answer = -1;
+
+  while (low <= high) {
+    const mid = low + Math.floor((high - low) / 2);
+    if (arr[mid] >= target) {
+      answer = mid;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return answer;
+}
+```
+
+### Invariants:
+
+**Invariant**: If `target` is in `arr` then there exists at least one valid range `[low, high]` where `low <= firstIndex(target) <= high` and `arr[low] <= target <= arr[high]`.
+
+If `target` is not in `arr` then there doesn't exist any such valid range `[low, high]`.
+
+#### Proving Invariant:
+
+Before entering the loop, if `target` exists in `arr` then the range `[0, arr.length - 1]` will definitely contain its first occurrence.
+
+##### `arr[mid] >= target` branch:
+
+Inside the loop, if `arr[mid] >= target` then we have found one such occurrence of `target` in our `arr`. It can be a valid first occurrence but there's a chance that there might be a first occurrence before this. Mathematically, we know for sure that for all `i > mid`, `arr[i] >= arr[mid] >= target` and since we are only interested in the first occurrence we can store current `mid` as a valid answer for the current `[low, high]` range and continue our search for the first occurrence in `[low, mid - 1]` and our invariant will be preserved if there's a first occurrence in the range `[low, mid - 1]`.
+
+##### `arr[mid] < target` branch (else branch):
+
+Since `arr[mid] < target` then for all index `i < mid`, `arr[i] <= arr[mid] < target` and hence it is futile to search in the range `[low, mid]`.
+
+So when we set `low` to `mid + 1`, our invariant still holds true. If `target` is in `arr` then its first occurrence will be found in the updated range `[mid + 1, high]`.
+
+### Bound function:
+
+Since the loop condition and the updates in `low` and `high` variables are similar to the first approach, we won't be proving the loop termination via bound function for this approach.
+
+### Proof of correctness:
+
+If `target` existed in `arr` then by our invariant we would have reached a range such that `low == high == mid` for which `low <= firstOccurrence(target) <= high` and since `low == high == mid` we would have stored that `mid` as `answer`. So if target existed in `arr` then we would have stored its first occurrence in the `answer`.
+
+Eventually, we will break out of the loop when `low > high` and that will happen only after we have searched for the smallest possible range which is `low == high == mid` and for that valid search space, if `arr[mid]` was equal to `target` then we would've returned stored `mid` as the `answer`. The fact that `answer` is `-1` means that we have exhausted all valid search spaces and target doesn't exist in the array and hence it doesn't have first occurrence.
+
+---
+
+## 3) Find the index of an element's last occurrence in a sorted array (with duplicates):
+
+### Code:
+
+```ts
+function findLastOccurrence(arr: number[], target: number): number {
+  let low = 0;
+  let high = arr.length - 1;
+  let answer = -1;
+
+  while (low <= high) {
+    const mid = low + Math.floor((high - low) / 2);
+    if (arr[mid] == target) {
+      answer = mid;
+      low = mid + 1;
+    } else if (arr[mid] > target) {
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return answer;
+}
+```
+
+### Invariants:
+
+**Invariant**: If `target` is in `arr` then there exists at least one valid range `[low, high]` where `low <= lastIndex(target) <= high` and `arr[low] <= target <= arr[high]`.
+
+If `target` is not in `arr` then there doesn't exist any such valid range `[low, high]`.
+
+#### Proving Invariant:
+
+Before entering the loop, if `target` exists in `arr` then the range `[0, arr.length - 1]` will definitely contain its first occurrence.
+
+##### `arr[mid] == target` branch:
+
+Inside the loop, if `arr[mid] == target` then we have found one such occurrence of `target` in our `arr`. It can be a valid last occurrence but there's a chance that there might be a last occurrence after this.
+
+Mathematically, we know that for all `i > mid`, `arr[i] >= arr[mid] >= target` and since we are interested in the last occurrence we can store current `mid` as a valid answer for the current `[low, high]` range and continue our search for the last occurrence in `[mid + 1, high]` and our invariant will be preserved if there's a last occurrence in the range `[mid + 1, high]`.
+
+##### `arr[mid] > target` branch (else if branch):
+
+Since `arr[mid] > target` then for all index `i > mid`, `arr[i] >= arr[mid] > target` and hence it is futile to search in the range `[mid, high]`.
+
+So when we set `high` to `mid - 1`, our invariant still holds true. If `target` is in `arr` then its last occurrence will be found in the updated range `[low, mid - 1]`.
+
+##### `arr[mid] < target` branch (else branch):
+
+Since `arr[mid] < target` then for all index `i < mid`, `arr[i] <= arr[mid] < target` and hence it is futile to search in the range `[low, mid]`.
+
+So when we set `low` to `mid + 1`, our invariant still holds true. If `target` is in `arr` then its first occurrence will be found in the updated range `[mid + 1, high]`.
+
+### Bound function:
+
+Since the loop condition and the updates in `low` and `high` variables are similar to the first approach, we won't be proving the loop termination via bound function for this approach.
+
+### Proof of correctness:
+
+If `target` existed in `arr` then by our invariant we would have reached a range such that `low == high == mid` for which `low <= lastOccurrence(target) <= high` and since `low == high == mid` we would have stored that `mid` index as `answer`. So if target existed in `arr` then we would have stored its last occurrence in the `answer`.
+
+Eventually, we will break out of the loop when `low > high` and that will happen only after we have searched for the smallest possible range which is `low = high = mid` and for that valid search space, if `arr[mid]` was equal to `target` then we would've stored `mid` as the `answer`. The fact that `answer` is -1 means that we have exhausted all valid search spaces and target doesn't exist in the array and hence it doesn't have last occurrence.
+
+---
+
+## 4) Find the first element that is greater than the target in a sorted array:
+
+### Code:
+
+```ts
+function findUpperbound(arr: number[], target: number): number {
+  let low = 0;
+  let high = arr.length - 1;
+  let answer = -1;
+
+  while (low <= high) {
+    const mid = low + Math.floor((high - low) / 2);
+    if (arr[mid] > target) {
+      answer = mid;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return answer;
+}
+```
+
+### Invariants:
+
+**Invariant**: If `upperBound(target)` is in `arr` then there exists at least one valid range `[low, high]` where `low <= indexOf(upperBound(target)) <= high` and `arr[low] <= upperBound(target) <= arr[high]`.
+
+If `upperBound(target)` is not in `arr` then there doesn't exist any such valid range `[low, high]`.
+
+#### Proving Invariant:
+
+Before entering the loop, if `upperBound(target)` exists in `arr` then the range `[0, arr.length - 1]` will definitely contain it.
+
+##### `arr[mid] > target` branch:
+
+For all `i >= mid`, `arr[i] >= arr[mid] > target` and since we are interested in finding the first element that is just greater than the `target`, i.e., `upperBound(target)` we can store current `mid` as a valid answer for the current `[low, high]` range and continue our search for the `upperBound(target)` in `[low, mid - 1]`.
+
+So when we set `high` to `mid - 1`, our invariant still holds true. If `upperBound(target)` is in `arr` then it will be found in the updated range `[low, mid - 1]`.
+
+##### `arr[mid] <= target` branch (else branch):
+
+Since `arr[mid] <= target` then for all index `i < mid`, `arr[i] <= arr[mid] <= target` and hence it is futile to search for the `upperBound(target)` in the range `[low, mid]`.
+
+So when we set `low` to `mid + 1`, our invariant still holds true. If `target` is in `arr` then its first occurrence will be found in the updated range `[mid + 1, high]`.
+
+### Bound function:
+
+Since the loop condition and the updates in `low` and `high` variables are similar to the first approach, we won't be proving the loop termination via bound function for this approach.
+
+### Proof of correctness:
+
+If `upperBound(target)` existed in `arr` then by our invariant we would have reached a range such that `low == high == mid` for which `low <= upperBound(target) <= high`. And since `low == high == mid` we would have stored that `mid` index as `answer`. So if `upperBound(target)` existed in `arr` then we would have stored its index in the `answer`.
+
+Eventually, we will break out of the loop when `low > high` and that will happen only after we have searched for the smallest possible range which is `low == high == mid` and for that valid search space, if `arr[mid]` was equal to `upperBound(target)` then we would've stored `mid` as the `answer`. The fact that `answer` is `-1` means that we have exhausted all valid search spaces and `upperBound(target)` doesn't exist in the array.
+
+---
+
+## 5) Find the first element that is smaller than the `target` in a sorted array:
+
+### Code:
+
+```ts
+function findLowerBound(arr: number[], target: number): number {
+  let low = 0;
+  let high = arr.length - 1;
+  let answer = -1;
+
+  while (low <= high) {
+    const mid = low + Math.floor((high - low) / 2);
+    if (arr[mid] < target) {
+      answer = mid;
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return answer;
+}
+```
+
+### Invariants:
+
+**Invariant**: If `lowerBound(target)` is in `arr` then there exists at least one valid range `[low, high]` where `low <= indexOf(lowerBound(target)) <= high` and `arr[low] <= lowerBound(target) <= arr[high]`.
+
+If `lowerBound(target)` is not in `arr` then there doesn't exist any such valid range `[low, high]`.
+
+#### Proving Invariant:
+
+Before entering the loop, if `lowerBound(target)` exists in `arr` then the range `[0, arr.length - 1]` will definitely contain it.
+
+##### `arr[mid] < target` branch:
+
+For all `i <= mid`, `arr[i] <= arr[mid] < target` and since we are interested in the lower bound (i.e., the first element smaller than the `target`) we can store current `mid` as a valid answer for the current `[low, high]` range and continue our search for the `lowerBound(target)` in `[mid + 1, high]`.
+
+So when we set `low` to `mid + 1`, our invariant still holds true. If `lowerBound(target)` is in `arr` then it will be found in the updated range `[mid + 1, high]`.
+
+##### `arr[mid] >= target` branch (else branch):
+
+For all `i >= mid`, `arr[i] >= arr[mid] >= target` and since we are interested in the lower bound (i.e., the first element smaller than the `target`) it is futile to search for it in the range `[mid + 1, high]`.
+
+So when we set `high` to `mid - 1`, our invariant still holds true. If `lowerBound(target)` is in `arr` then it will be found in the updated range `[low, mid - 1]`.
+
+### Bound function:
+
+Since the loop condition and the updates in `low` and `high` variables are similar to the first approach, we won't be proving the loop termination via bound function for this approach.
+
+### Proof of correctness:
+
+If `lowerBound(target)` existed in `arr` then by our invariant we would have reached a range such that `low == high == mid` for which `low <= lowerBound(target) <= high`. And since `low == high == mid` and `arr[mid] == lowerBound(target) < target) we would have stored that `mid`index as`answer`. So if `lowerBound(target)`existed in`arr`then we would have stored its index in the`answer`.
+
+Eventually, we will break out of the loop when `low > high` and that will happen only after we have searched for the smallest possible range which is `low == high == mid` and for that valid search space, if `arr[mid]` was equal to `lowerBound(target)` then we would've stored `mid` as the `answer`. The fact that `answer` is `-1` means that we have exhausted all valid search spaces and `lowerBound(target)` doesn't exist in the array.
