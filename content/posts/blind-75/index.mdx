@@ -443,3 +443,81 @@ If `target` is not found in the either of the region, we return -1.
 Time complexity: `O(logN)` to find the index of pivot. `O(logN)` to find the `target` in the two sorted sub-arrays of `nums`
 
 The code for the above approach can be found [here](https://leetcode.com/submissions/detail/697560316/).
+
+---
+
+### [Combination Sum](https://leetcode.com/problems/combination-sum/)
+
+#### Problem Statement:
+
+Given an array of **distinct** integers `candidates` and a target integer `target`, return a list of \*all **unique combinations\*** of candidates where the chosen numbers sum to target. You may return the combinations in any order.
+
+The **same** number may be chosen from candidates an **unlimited number of times**.
+Two combinations are unique if the frequency of at least one of the chosen numbers is different.
+
+It is **guaranteed** that the number of unique combinations that sum up to _target_ is less than 150 combinations for the given input.
+
+#### Solution:
+
+##### Recursive Approach:
+
+First of all, we sort all the `candidates` in ascending order.
+
+Let's say we are considering whether to include `candidates[0]` in building the `target` or not.
+If we choose to include `candidates[0]` to include in the `target` then we need to see if `target - candidates[0]` can be build from `candidates[0:]` since repeatations are allowed.
+If we choose to exclude `candidates[0]` then our job is to find if we can build `target` from `candidates[1:]` onwards.
+
+To generalise,
+
+```
+canBuild(candidates[i:], target) = canBuild(candidates[0:], target - candidates[i])
+  || canBuild(candidates[(i + 1):], target)
+```
+
+<!--
+```ts
+const answer: number[][] = [];
+
+function canBuild(
+  candidates: number[],
+  currentIndex: number,
+  target: number,
+  currentPath: number[]
+): void {
+  canBuild(candidates, currentIndex + 1, target, [...currentPath]);
+  canBuild(candidates, 0, target - candidates[currentIndex], [
+    ...currentPath,
+    candidates[0],
+  ]);
+}
+``` -->
+
+The base condition will be:
+
+- If `target < 0` then we will return `false`.
+- If `target === 0` then we return `true`.
+- If `i >= candidates.length` and `target > 0` then we return `false`.
+
+The above recurrence relation with the base cases just tells us if it is possible to generate `target` from all `candidates` or not.
+We actually need to find all the combinations too. How do we find the combinations?
+
+For this, we maintain a global `answer` array where we will store all the combinations and we keep an array of current combinations at each step.
+If `target === 0` then we push the current combination array in the `answer` array.
+But this will lead to pushing duplicate combinations having same frequency if the recurrence relation logic is kept the same.
+This is because let's say the `candidates` array is `[2, 3]` and target is `7`.
+Then there are two paths that will lead us to 7:
+
+1. Pick `candidates[0]`, `candidates[0]` and then `candidates[1]`
+2. Pick `candidates[1]`, `candidates[0]` and then `candidates[0]` again.
+
+How do we avoid these duplicate combinations?
+
+Suppose, there was a combination containing `candidates[i]` that led to `target`.
+Either this combination would have been found by our exhaustive search when we were at index `j < i`,
+or `candidates[i]` would have been the first one in the `combinations` array.
+
+Hence, we can avoid searching from 0 again when we pick an element `candidates[i]` and keep searching for answer from `i` itself.
+
+Time complexity: At each step, we have two choices.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/697627968/).
