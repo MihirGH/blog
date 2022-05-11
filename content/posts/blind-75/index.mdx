@@ -521,3 +521,74 @@ Hence, we can avoid searching from 0 again when we pick an element `candidates[i
 Time complexity: At each step, we have two choices.
 
 The code for the above approach can be found [here](https://leetcode.com/submissions/detail/697627968/).
+
+---
+
+### [Rotate Image](https://leetcode.com/problems/rotate-image/)
+
+#### Problem Statement:
+
+You are given an `n x n` 2D matrix representing an image, rotate the image by 90 degrees (clockwise).
+
+You have to rotate the image in-place, which means you have to modify the input 2D matrix directly. **DO NOT** allocate another 2D matrix and do the rotation.
+
+#### Initial thoughts:
+
+![Image explaining the matrix before and after rotation](https://cdn.hashnode.com/res/hashnode/image/upload/v1650094051142/_YcQoBjlA.png)
+
+After looking at the above image and tracking each element, we can see a pattern here that:
+
+- an element in the `j`th column goes to `j`th row and
+- an element in the `i`th row goes to `n - 1 - i`th column.
+
+In general, an element `(i, j)` goes to `(j, n - 1 - i)`.
+
+I was able to derive the above pattern on my own and using the above pattern, we can derive the rotated matrix of size `n x n`
+but that would have consumed extra space and wouldn't satisfy the constraint that we need to do this in-place - without using extra memory.
+
+#### Solution:
+
+##### Seeing rotation as composition of transformations:
+
+We can see that the 90 degree clockwise rotation is nothing but a composition/chaining of 2 transformations:
+
+- An element at `(i, j)` goes to `(j, i)` - also commonly known as transpose
+- Element at `(i, j)` goes to `(i, n - 1 - j)` - vertical reflection
+
+Our original rotation is nothing but an element going to its transpose position and from there going to its reflection: `(i, j) -> (j, i) -> (j, n - 1 - i)`.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/681305822/).
+
+##### [Rotate Groups of Four Cells](https://leetcode.com/problems/rotate-image/solution/):
+
+We can see that element at `(i, j)` goes to `(j, n - 1 - i)` which goes to `(n - 1 - i, n - 1 -j)` which goes to `(n - 1 - j, i)` which finally goes to `(i, j)`. So what we can do is:
+
+```ts
+const temp = matrix[n - 1 - j][i];
+// Update fourth element by third
+matrix[n - 1 - j][i] = matrix[n - 1 - i][n - 1 - j];
+// Update third element by second
+matrix[n - 1 - i][n - 1 - j] = matrix[j][n - 1 - i];
+// Update second element by first
+matrix[j][n - 1 - i] = matrix[i][j];
+// Update first element by fourth
+matrix[i][j] = temp;
+```
+
+The main challenge in this approach is how to execute the above swaps in a loop so that all elements are touched only once.
+
+For this let's say we are looking at `n x n` matrix right now. Let's say we are going to handle the elements of just the 0th row for now.
+
+Let's say we loop from the `0`th column and go on till the `(n - 2)`th column (0-based indexing). If we rotate any element `matrix[0][j]` then for that we will end up rotating the corresponding element on the `(n - 1)`th column, `(n - 1)`th row and `0`th column according to the above logic.
+And after we are done rotating all such element `matrix[0][j]` where `0 <= j < n - 1` we will have taken care of the outermost layer of the `n x n` matrix, and we will be left with rotating remaining `(n - 2) x (n - 2)` matrix.
+
+More generally, if we are solving for a `k x k` sub-matrix, at any element `left + i` in the `top` row, `matrix[top][left + i]` will go to `matrix[top + i][right]` that will go to `matrix[bottom][right - i]` and that will go to `matrix[bottom - i][left]` which will eventually go back to `matrix[top][left + i]` for all `0 <= i < (right - left)`.
+
+Here `top` and `bottom` are the first and last rows and `left` and `right` are the first and last columns respectively of the `k x k` sub-matrix of an `n x n` sub-matrix.
+Formally, `top = k - 1`, left = `k - 1`, right = `n - k` bottom = `n - k` in a zero based indexing.
+For example, if we looking at the inner `2 x 2` matrix then `top = left = (2 - 1) = 1` and `right = bottom = (4 - 2) = 2`.
+Once we are done with handling `k x k` sub-matrix we move on to handle `(k - 2) x (k - 2)` sub-matrix of this `k x k` sub-matrix.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/681391222/).
+
+[This](https://www.youtube.com/watch?v=fMSJSS7eO1w) is a great video from NeetCode channel illustrating the above approach visually.
