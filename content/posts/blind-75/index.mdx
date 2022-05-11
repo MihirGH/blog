@@ -395,3 +395,51 @@ The code for the above approach can be found [here](https://leetcode.com/submiss
 ##### Optimized solution using MinHeap:
 
 The detailed explanation of the MinHeap datastructure and the solution using MinHeap can be found [here](./heap).
+
+---
+
+### [Search in Rotated Sorted Array](https://leetcode.com/problems/search-in-rotated-sorted-array/)
+
+#### Problem Statement:
+
+There is an integer array `nums` sorted in ascending order (with distinct values).
+
+Prior to being passed to your function, `nums` is **possibly rotated** at an unknown pivot index `k` `(1 <= k < nums.length)` such that the resulting array is
+`[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]` (0-indexed).
+For example, [0,1,2,4,5,6,7] might be rotated at pivot index 3 and become [4,5,6,7,0,1,2].
+
+Given the array `nums` after the possible rotation and an integer `target`, return the index of `target` if it is in `nums`, or `-1` if it is not in `nums`.
+
+You must write an algorithm with `O(logN)` runtime complexity.
+
+#### Solution:
+
+##### Binary Search:
+
+After the rotation, the `nums` array can be thought of as partitioned into three regions: `[...x, pivot, ...y]`.
+The region `x` is sorted in ascending order and also the combined region `[pivot, ...y]` is sorted in ascending order.
+Because `nums` had distinct values, all the numbers in the `x` region are strictly greater than `pivot` and all the numbers in the `y` region.
+
+Hence, if we want to find target in nums array, we can either find it in the `x` region via binary search or in the `[pivot, ...y]` region via binary search.
+And this will require us to find the index of the `pivot` first.
+
+**Finding index of `pivot`**:
+
+We are interested in finding index of the `pivot` element say `i`. Notice that `pivot < y[0]` and `pivot < x[x.length - 1]`.
+So, if we were to apply binary search to find the index of `pivot`, our base case would be finding `mid` such that `arr[mid] < arr[mid + 1]` and `arr[mid] < arr[mid - 1]`.
+And at each step, we can also prune the half of the search space, how?
+
+If `arr[mid] > arr[high]` then we know that this can only happen if `arr[mid]` is in the `x` region and the pivot can only be found in the `[mid + 1, high]` region.
+And if `arr[mid] < arr[high]` then we know that this can happen if `arr[mid]` is in the `[pivot, ...y]` region.
+It is possible that `arr[mid]` is the `pivot` so we store it as a potential answer and keep searching in the `[low, mid - 1]` region
+This is so for the case when `arr[mid]` is in `y` region and not equal to `pivot`.
+
+So, since we are able to correctly prune the search space by half, we can use binary search in finding the index of pivot.
+
+**Finding index of `target`**:
+Once we have found the index of `pivot`, we are just left with the task of finding `target` in `nums.slice(0, pivotIndex)` and `nums.slice(pivotIndex)`.
+If `target` is not found in the either of the region, we return -1.
+
+Time complexity: `O(logN)` to find the index of pivot. `O(logN)` to find the `target` in the two sorted sub-arrays of `nums`
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/697560316/).
