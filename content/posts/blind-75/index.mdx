@@ -592,3 +592,29 @@ Once we are done with handling `k x k` sub-matrix we move on to handle `(k - 2) 
 The code for the above approach can be found [here](https://leetcode.com/submissions/detail/681391222/).
 
 [This](https://www.youtube.com/watch?v=fMSJSS7eO1w) is a great video from NeetCode channel illustrating the above approach visually.
+
+---
+
+### [Group Anagrams](https://leetcode.com/problems/group-anagrams/)
+
+#### Problem Statement:
+
+Given an array of strings `strs`, group the anagrams together. You can return the answer in any order.
+
+An Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.
+
+#### Initial thoughts:
+
+##### Using a HashMap:
+
+Since all anagrams have same characters and same frequency for each character, their sorted strings are equal.
+This sorted string can be used as a representative string and this can be used as a key in the HashMap.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/681640055/).
+
+#### Solution:
+
+##### Using frequency as a key in the HashMap:
+
+We can transform each string `s` into a tuple of 26 non-negative integers representing the number of all characters.
+We can then join the entries of this tuple via a delimiter such as # and use the resulting string as the key in the HashMap.
