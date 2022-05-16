@@ -618,3 +618,53 @@ The code for the above approach can be found [here](https://leetcode.com/submiss
 
 We can transform each string `s` into a tuple of 26 non-negative integers representing the number of all characters.
 We can then join the entries of this tuple via a delimiter such as # and use the resulting string as the key in the HashMap.
+
+---
+
+### [Maximum Subarray](https://leetcode.com/problems/maximum-subarray/)
+
+#### Problem Statement:
+
+Given an integer array `nums`, find the contiguous subarray (containing at least one number) which has the largest sum and return _its sum_.
+
+A **subarray** is a **contiguous** part of an array.
+
+#### Solution:
+
+##### Kadane's Algorithm:
+
+Let's say we define `maxSum(i)` as the maximum sub-array sum for all sub-arrays ending at index `i`.
+This means that `maxSum(i) = Math.max(subArraySum(0, i), subArraySum(1, i), ..., subArraySum(i, i))` where `subArraySum(l, r)` is the sum of the sub-array starting at index `l` and ending at index `r`.
+
+Similarly, `maxSum(i + 1) = Math.max(subArraySum(0, i + 1), subArraySum(1, i + 1), ..., subArraySum(i + 1, i + 1))`.
+But since `subArraySum(0, i + 1) = subArraySum(0, i) + nums[i + 1]` we can write `maxSum(i + 1)` as `Math.max(subArraySum(0, i) + nums[i + 1], subArraySum(1, i) + nums[i + 1], ..., nums[i + 1])`.
+
+Since `Math.max(a + y, b + y, c + y) = Math.max(a, b, c) + y` we can write `maxSum(i + 1)` as `Math.max(Math.max(subArraySum(0, i), ..., subArraySum(i, i)) + nums[i + 1], 0 + nums[i + 1])`.
+And since `Math.max(subArraySum(0, i), ..., subArraySum(i, i)) = maxSum(i)` we have our final recurrence relation as:
+
+`maxSum(i + 1) = Math.max(maxSum(i) + nums[i + 1], nums[i + 1])`.
+
+We can store this in a 1D array. Since we don't know at which index `k` our sub-array with maximum sum ends,
+we need to loop through all the indices and take max of all the `maxSum(i)` for all `0 <= i < nums.length`
+
+The above solution has `O(N)` time and space complexity. But we can cleverly get rid of the `O(N)` space and make its space complexity `O(1)`.
+
+**Memory Optimiszation**:
+
+Since `maxSum(i + 1)` only depends on `maxSum(i)` we can keep a variable called `prevMaxSum` and have a global `maxSum` variable which will eventually store our answer.
+We initialise `prevMaxSum` and `maxSum` with `nums[0]`. Then we loop through all the elements from index 1 and calculate the currentSum as `prevSum + nums[i]`.
+We set maxSum as `Math.max(maxSum, currentSum)` and later assign `prevMaxSum` as `currentSum`.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/700080102/).
+
+**A greedy approach that leads to the same algorithm**:
+
+We want to find all the sub-arrays with positive sum and then find the maximum out of those sub-arrays.
+So, we keep a variable called `sumSoFar` and initialise it with nums[0]. When we are at the ith element, we check if `sumSoFar < 0`.
+If the `sumSoFar` is less than zero then there's no point in continuing that sub-array and we should start a new max sub-array candidate starting at index `i`.
+After updating the `sumSoFar` we check if the updated value of `sumSoFar` is the maximum we have seen so far or not and update our `maxSum` variable accordingly to update our answer.
+
+This way, we will always have either:
+
+- positive values of `sumSoFar` - corresponding to the sub-arrays with positive sum.
+- or the least negative value out of `nums` array - if all elements of `nums` array were negative.
