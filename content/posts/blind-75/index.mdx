@@ -668,3 +668,26 @@ This way, we will always have either:
 
 - positive values of `sumSoFar` - corresponding to the sub-arrays with positive sum.
 - or the least negative value out of `nums` array - if all elements of `nums` array were negative.
+
+---
+
+### [Spiral Matrix](https://leetcode.com/problems/spiral-matrix/)
+
+#### Problem Statement:
+
+Given an `m x n matrix`, return all elements of the `matrix` in spiral order.
+
+#### Initial thoughts:
+
+This problem can be solved using the same approach as Rotate Image problem. First of all, we start with the `top`, `left`, `right` and `bottom` pointers. We initialise `top` pointer as `0`, the `bottom` pointer as `m - 1`, the `left` pointer as `0` and the `right` pointer as `n - 1`. Then for given set of these four pointers, we need to traverse the elements in this order:
+
+- All elements of the `top` row from `left` to `right` column and increment the `top` pointer by 1.
+- All elements of the `right` column from the updated `top` (`prevTop + 1`) to the `bottom` row and decrease the `right` pointer by 1.
+- All elements of the `bottom` row from the updated `right` (`prevRight - 1`) to `left` column only if `top <= bottom`, and decrease the bottom pointer by 1.
+- Finally, all the elements of the `left` column from the updated `bottom` (`prevBottom - 1`) to updated `top` (`prevTop - 1`) row only if `left <= right`.
+
+These if conditions in the 3rd and 4th step are to make sure we don't overcount.
+
+This way, we'd have taken care of all the elements in the outer layer and we simply need to focus on the inner remaining matrix.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/700852637/).
