@@ -1,0 +1,191 @@
+---
+title: Leetcode One Dimensional DP problems
+slug: one-dimensional-dp
+date: 2022-05-18
+updatedOn: 2022-05-18
+description: A blog meant to serve as breadcrumbs for my futureself consisting of thoughts, gotchas and the final solutions when going through the LeetCode problems in the Blind75 list around 1D DP.
+tags:
+  - DynamicProgramming
+  - Algorithms
+  - Blind75
+  - LeetCode
+---
+
+### [Maximum Subarray](https://leetcode.com/problems/maximum-subarray/)
+
+#### Problem Statement:
+
+Given an integer array `nums`, find the contiguous subarray (containing at least one number) which has the largest sum and return _its sum_.
+
+A **subarray** is a **contiguous** part of an array.
+
+#### Solution:
+
+##### Kadane's Algorithm:
+
+Let's say we define `maxSum(i)` as the maximum sub-array sum for all sub-arrays ending at index `i`.
+This means that `maxSum(i) = Math.max(subArraySum(0, i), subArraySum(1, i), ..., subArraySum(i, i))` where `subArraySum(l, r)` is the sum of the sub-array starting at index `l` and ending at index `r`.
+
+Similarly, `maxSum(i + 1) = Math.max(subArraySum(0, i + 1), subArraySum(1, i + 1), ..., subArraySum(i + 1, i + 1))`.
+But since `subArraySum(0, i + 1) = subArraySum(0, i) + nums[i + 1]` we can write `maxSum(i + 1)` as `Math.max(subArraySum(0, i) + nums[i + 1], subArraySum(1, i) + nums[i + 1], ..., nums[i + 1])`.
+
+Since `Math.max(a + y, b + y, c + y) = Math.max(a, b, c) + y` we can write `maxSum(i + 1)` as `Math.max(Math.max(subArraySum(0, i), ..., subArraySum(i, i)) + nums[i + 1], 0 + nums[i + 1])`.
+And since `Math.max(subArraySum(0, i), ..., subArraySum(i, i)) = maxSum(i)` we have our final recurrence relation as:
+
+`maxSum(i + 1) = Math.max(maxSum(i) + nums[i + 1], nums[i + 1])`.
+
+We can store this in a 1D array. Since we don't know at which index `k` our sub-array with maximum sum ends,
+we need to loop through all the indices and take max of all the `maxSum(i)` for all `0 <= i < nums.length`
+
+The above solution has `O(N)` time and space complexity. But we can cleverly get rid of the `O(N)` space and make its space complexity `O(1)`.
+
+**Memory Optimiszation**:
+
+Since `maxSum(i + 1)` only depends on `maxSum(i)` we can keep a variable called `prevMaxSum` and have a global `maxSum` variable which will eventually store our answer.
+We initialise `prevMaxSum` and `maxSum` with `nums[0]`. Then we loop through all the elements from index 1 and calculate the currentSum as `prevSum + nums[i]`.
+We set maxSum as `Math.max(maxSum, currentSum)` and later assign `prevMaxSum` as `currentSum`.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/700080102/).
+
+**A greedy approach that leads to the same algorithm**:
+
+We want to find all the sub-arrays with positive sum and then find the maximum out of those sub-arrays.
+So, we keep a variable called `sumSoFar` and initialise it with nums[0]. When we are at the ith element, we check if `sumSoFar < 0`.
+If the `sumSoFar` is less than zero then there's no point in continuing that sub-array and we should start a new max sub-array candidate starting at index `i`.
+After updating the `sumSoFar` we check if the updated value of `sumSoFar` is the maximum we have seen so far or not and update our `maxSum` variable accordingly to update our answer.
+
+This way, we will always have either:
+
+- positive values of `sumSoFar` - corresponding to the sub-arrays with positive sum.
+- or the least negative value out of `nums` array - if all elements of `nums` array were negative.
+
+---
+
+### [Jump Game](https://leetcode.com/problems/jump-game/)
+
+#### Problem Statement:
+
+You are given an integer array `nums`. You are initially positioned at the array's **first index**, and each element in the array represents your maximum jump length at that position.
+
+Return _`true` if you can reach the last index, or `false` otherwise_.
+
+#### Solution:
+
+<!--
+**Very Bruteforce Solution:**
+
+We can reach the last index - say `(n - 1)` if:
+
+- We can reach `(n - 2)`nd index and `nums[n - 2] >= (n - 1) - (n - 2) >= 1` or
+- We can reach `(n - 3)`rd index and `nums[n - 3] >= (n - 1) - (n - 3) >= 2` or
+- We can reach `(n - 4)`th index and `nums[n - 4] >= (n - 1) - (n - 4) >= 3` or
+- ...
+- We can reach 1st index and nums[1] >= (n - 1) - (1) >= n - 2 or
+- nums[0] >= n - 1
+
+And if we take a closer look at the sub-problem of reaching `(n - 2)`nd index we see that we can reach it if:
+
+- We can reach `(n - 3)`rd index and `nums[n - 3] >= (n - 2) - (n - 3) >= 1` or
+- We can reach `(n - 4)`th index and `nums[n - 4] >= (n - 2) - (n - 4) >= 3` or
+- ...
+- We can reach 1st index and `nums[1] >= (n - 2) - (1) >= n - 3` or
+- `nums[0] >= n - 2`
+
+So even if we have answer for `(n - 2)` we won't be able to use it or any of its sub-problem to avoid repeated work.
+The time complexity of this algorithm is O(n ^ n) since we are checking for each index at most `n` times and there's no common/memoizable work. -->
+
+**Recursive Solution:**
+
+We can reach the last index from an index `i` if:
+
+- we can reach the last index from `(i + 1)`th index or
+- we can reach the last index from `(i + 2)`th index or
+  ...
+- we can reach the last index from `(i + nums[i])`th index
+
+And we can get a nice recurrence relation as:
+
+```
+canReachFrom(i) = canReachFrom(i + 1) || ... || canReachFrom(i + nums[i])
+```
+
+We can also see that while computing `canReachFrom(i + 1)` we might also end up computing `canReachFrom(i + 2)` which might also be needed for `canReachFrom(i)`.
+So, we can also memoize the answers for each index so we don't end up doing duplicate work.
+
+Recursively we can write the code as follows:
+
+```ts
+const indexVsReachableMap = new Map<number, boolean>();
+
+function canReachFrom(currentIndex: number, nums: number[]): boolean {
+  if (indexVsReachableMap.has(currentIndex)) {
+    return indexVsReachableMap.get(currentIndex);
+  }
+
+  if (currentIndex >= nums.length - 1) return true;
+
+  let answer = false;
+  for (let offset = 1; offset <= nums[currentIndex]; offset++) {
+    const nextIndex = currentIndex + offset;
+    const isReachable = canReachFrom(nextIndex, nums);
+    if (isReachable) {
+      answer = true;
+      break;
+    }
+  }
+
+  indexVsReachableMap.set(currentIndex, answer);
+
+  return answer;
+}
+```
+
+The happy case will be if `nums[i] >= (n - 1 - i)` for every `0 <= i < n - 1`. In this case, we will end up having only one branch of depth `n`.
+`canReachFrom(0)` will call `canReachFrom(1)` which will call `canReachFrom(2)` and it will go on till `canReachFrom(n - 2)` and we would have returned true since everything was reachable.
+
+The worst case scenario will occurr when `canReachFrom(n - 2)` is false and `nums[i] === (n - 2) - i` meaning it is possible to reach `(n - 2)`th index from every idnex.
+In that case, from the bottom of the recursion callstack, we will have:
+
+- `canReachFrom(n - 3)` which checks for `canReachFrom(n - 2)` and returns false
+- `canReachFrom(n - 4)` which checks for `canReachFrom(n - 3)` and `canReachFrom(n - 2)` and returns false.
+- `canReachFrom(n - 5)` which checks for `canReachFrom(n - 4)`, `canReachFrom(n - 3)` and `canReachFrom(n - 2)` and returns false.
+  ...
+- `canReachFrom(0)` which checks for `canReachFrom(1)`, `canReachFrom(2)`, ..., `canReachFrom(n - 2)` and returns false
+
+In the above case since we are going through all the elements at most `n` times and hence the time complexity is `O(n ^ 2)`.
+
+**Iterative Solution:**
+
+Let's say we tried to write an iterative solution for the above recursive solution.
+We will keep an `isReachableFrom` array where `isReachableFrom[i]` indicates if it is possible to reach the last index from index `i`.
+
+```
+isReachableFrom[i] = isReachableFrom[i + 1] || ... || isReachableFrom[i + nums[i]]
+```
+
+From above recurrence relation, we know that `isReachableFrom[i]` depends on the values of `nums[i]` and `isReachableFrom[j]` where `i < j <= i + nums[i]`.
+Hence, we will start filling this array backwards.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/701582297/).
+
+**Greedy Solution:**
+
+Since we are only interested in finding out if we can reach the last index or not, we can use a greedy solution.
+We start off with keeping a `maxReach` variable which any given index `i` during the iteration, indicates the maximum reachable index from all of the indices in the range `[0, i]`.
+So at the beginning we initialise it with 0 since the reach is zero before starting our iteration.
+Then we loop through all indices from 0 to `(n - 2)` and if a particular index `i` is reachable i.e., `i <= maxReach`, we update the `maxReach` by `Math.max(maxReach, i + nums[i])`.
+At last, we return true if `maxReach >= n - 1` else false.
+
+**Proof of correctness:**
+
+We prove the correctness by _invariant_.
+
+Before entering the loop, we have set our `maxReach` variable to 0.
+If there is only one element in the array, the last index is 0 and it is reachable. Setting `maxReach` to 0 satisfies that edge case.
+
+Inside the loop, for given index `i`, `maxReach` indicates the largest reachable index from all the indices in the range `[0, i - 1]`.
+If the current index i is not reachable from the previous `[0, (i - 1)]` indices then `i > maxReach` and we cannot reach till the last index.
+So we break the loop and return false. Otherwise if `i <= maxReach` then our new `maxReach` is max of `i + nums[i]` or the previous `maxReach`.
+
+If the loop terminates successfully then it means that we completed the last iteration for `(n - 2)`th index successfully and we know for sure that `n - 2` is not greater than `maxReach`.
+Hence we know for sure that `maxReach >= n - 2` and we eventually just need to check if `maxReach >= n - 1` and return true if that's the case.
