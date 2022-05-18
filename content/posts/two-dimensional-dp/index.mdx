@@ -1,0 +1,58 @@
+---
+title: Leetcode Two Dimensional DP problems
+slug: two-dimensional-dp
+date: 2022-05-19
+updatedOn: 2022-05-19
+description: A blog meant to serve as breadcrumbs for my futureself consisting of thoughts, gotchas and the final solutions when going through the LeetCode problems in the Blind75 list around 2D DP.
+tags:
+  - DynamicProgramming
+  - Algorithms
+  - Blind75
+  - LeetCode
+---
+
+### [Unique Paths](https://leetcode.com/problems/unique-paths/)
+
+#### Problem Statement:
+
+There is a robot on an `m x n` grid.
+The robot is initially located at the **top-left corner** (i.e., `grid[0][0]`).
+The robot tries to move to the **bottom-right corner** (i.e., `grid[m - 1][n - 1]`).
+The robot can only move either down or right at any point in time.
+
+Given the two integers `m` and `n`, return _the number of possible unique paths that the robot can take to reach the bottom-right corner_.
+
+#### Solution:
+
+##### Recursive Solution:
+
+Suppose we are at the `(i, j)`th cell in the grid and we want to count the number of unique paths that are possible from (i, j) to (m - 1, n - 1).
+Since from `(i, j)` we can only go down i.e., `(i + 1, j)` or right i.e., `(i, j + 1)`, our problem at `(i, j)` can be broken into two sub-problems:
+finding number of unique paths from the node below `(i + 1, j)` and finding the number of unique paths from the node to the right `(i, j + 1)`.
+If we take a look at all the paths returned by these two neighbor nodes, the starting node of these two paths are different - `(i + 1, j)` and `(i, j - 1)`.
+Hence, there won't be any common path among these two sub-problems.
+Therefore, `countUniquePaths(i, j)` is simply `countUniquePaths(i + 1, j) + countUniquePaths(i, j + 1)`.
+
+The time complexity of this algorithm is since each node in the grid has at most two neighbours we are going to branch twice at each node.
+And the depth of this branch will be at most `m + n` and hence the time complexity of this recursive solution is `O(2 ^ (m + n))`.
+
+**Optimizing overlapping subproblems:**
+
+But there's actually a lot of overlapping sub-problems.
+For example: `countUniquePaths(0, 0)` requires solving `countUniquePaths(1, 0)` and `countUniquePaths(0, 1)`.
+If we take a look at these two sub-problems:
+`countUniquePaths(1, 0)` requires solving `countUniquePaths(2, 0)` and `countUniquePaths(1, 1)`.
+`countUniquePaths(0, 1)` requires solving `countUniquePaths(1, 1)` and `countUniquePaths(0, 2)`.
+So by the time we come to solving `countUniquePaths(0, 1)` we would have already solved `countUniquePaths(1, 1)` and we can re-use its result to avoid branching.
+
+So by introducing memoization, we will compute the results for each `(i, j)` only once.
+Also, since we are only adding results of `(i + 1, j)` and `(i, j + 1)` at `(i, j)`, the cost of computing result at `(i, j)` becomes `O(1)`.
+
+Hence the overall complexity after adding memoization becomes `O(m * n)`.
+
+##### Iterative Solution:
+
+Let `uniquePaths[i][j]` denote the number of paths from the node `(i, j)` till `(m - 1, n - 1)`.
+Since `uniquePaths[i][j] = uniquePaths[i + 1][j] + uniquePaths[i][j + 1]`, we start filling the DP array from bottom to top and from right to left.
+
+The code for this approach can be found [here](https://leetcode.com/submissions/detail/702254050/).
