@@ -189,3 +189,25 @@ So we break the loop and return false. Otherwise if `i <= maxReach` then our new
 
 If the loop terminates successfully then it means that we completed the last iteration for `(n - 2)`th index successfully and we know for sure that `n - 2` is not greater than `maxReach`.
 Hence we know for sure that `maxReach >= n - 2` and we eventually just need to check if `maxReach >= n - 1` and return true if that's the case.
+
+### [Climbing Stairs](https://leetcode.com/problems/climbing-stairs/):
+
+#### Problem Statement:
+
+You are climbing a staircase. It takes `n` steps to reach the top.
+
+Each time you can either climb `1` or `2` steps. In how many distinct ways can you climb to the top?
+
+#### Solution:
+
+Let's say `countSteps(i)` denotes the number of ways we can climb to the `i`th step.
+We can climb to the `i`th step by taking 1 step after reaching `(i - 1)`th step or by taking 2 steps after reaching `(i - 2)`th step.
+If we know number of distinct ways of reaching (i - 1)th step and (i - 2)th step then continuing the path by adding 1 and 2 steps respectively in those paths should give us the number of distinct ways of reaching the `i`th step.
+This holds true because there won't be any path common between (i - 1)th and (i - 2)th step and a union of those paths with 1 and 2 appended respectively will give us distinct paths as well.
+
+So basically, our recurrence relation boils down to `countSteps(i) = countSteps(i - 1) + countSteps(i - 2)` with following base conditions:
+
+- `countSteps(0) = 1` since there's only one way to climb level 0 and that consists of climbing no steps (if we were to enumerate steps sequence, it would be: `[[]]`).
+- `countSteps(1) = 1` since there's only one way to climb to level 1 and that consists of climbing 1 step (steps sequence: `[[1]]`).
+
+The code for this approach can be found [here](https://leetcode.com/submissions/detail/685583027/).
