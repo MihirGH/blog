@@ -211,3 +211,41 @@ So basically, our recurrence relation boils down to `countSteps(i) = countSteps(
 - `countSteps(1) = 1` since there's only one way to climb to level 1 and that consists of climbing 1 step (steps sequence: `[[1]]`).
 
 The code for this approach can be found [here](https://leetcode.com/submissions/detail/685583027/).
+
+---
+
+### [Longest Increasing Subsequence (LIS)](https://leetcode.com/problems/longest-increasing-subsequence/)
+
+#### Problem Statement:
+
+Given an integer array `nums`, return the length of the longest strictly increasing subsequence (LIS).
+
+A **subsequence** is a sequence that can be derived from an array by deleting some or no elements without changing the order of the remaining elements. For example, `[3,6,2,7]` is a subsequence of the array `[0,3,1,6,2,2,7]`.
+
+#### Initial Thoughts:
+
+**Dynamic Programming:**
+
+Suppose, we are at index `i` and we want to know the length of LIS ending at index `i` - `lisLength(i)`.
+What do we mean by length of LIS ending at index `i` - it means that we want to find all the sub-sequences that will have
+`nums[i]` as their last element and we want to take the one which has maximum length.
+
+To get the maximum length, we need to find an index `j` where `0<= j < i` such that `lisLength(j)` is maximum.
+But `lisLength(i)` is not as simple as `lisLength(j) + 1`. `nums[j]` has to be smaller than `nums[i]`,
+otherwise if we add `nums[i]` in the LIS ending at index `j` then LIS property will not be preserved.
+
+So, our task is to find out of all indices `j` where `0<= j < i` and `nums[j] < nums[i]` which one has maximum `lisLength(j)`.
+If no such index is found then our answer for `lisLength(i)` is simply 1 as we cannot form any sub-sequence other than the trivial `[nums[i]]` that ends with `nums[i]`.
+
+Ultimately, our task is to find `max(lisLength(i))` for all `i` such that `0 <= i < nums.length`.
+
+One may wonder why are we taking `max(lisLength(i))` and the answer to that is `lisLength(i)` only says what is the length of LIS that contains `nums[i]`.
+It is very well possible that the actual LIS doesn't have `nums[i]` and it ends on some other index.
+
+One may also wonder then why did we not define our sub-problem as `lisLength(i)` - length of LIS till index `i`.
+Had we defined our sub-problem that way then we would have just need to calculate `lisLength(nums.length - 1)`,
+but with that notation we wouldn't have been able to relate `lisLength(i)` with any of the other `lisLength(j)`.
+This is because we wouldn't know which element was the last element in `lisLength(j)` and whether it is possible to extend that sub-sequence or not.
+We can only build up on the sub-problem if we exactly know where the previous sub-sequence ended.
+
+The code for the above approach can be found [here](https://leetcode.com/submissions/detail/706421327/).
